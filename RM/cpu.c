@@ -1,6 +1,10 @@
 #include "cpu.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
+
+void Fetch();
+void Decode(uint16_t instruction);
 
 // RAM definition
 #define RAM_SIZE 128

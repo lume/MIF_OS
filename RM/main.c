@@ -6,7 +6,6 @@
 
 int main()
 {
-    ExecuteMachineCode("1010");
     ShowRam();
     return 0;
 }
