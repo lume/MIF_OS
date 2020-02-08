@@ -1,0 +1,24 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "gcc.exe build active file",
+            "command": "C:\\ProgramData\\chocolatey\\bin\\gcc.exe",
+            "args": [
+                "-g",
+                "${workspaceFolder}\\RM\\main.c",
+                "${workspaceFolder}\\RM\\compiler.c",
+                "${workspaceFolder}\\RM\\cpu.c",
+                "-o",
+                "${workspaceFolder}\\RM\\test.exe"
+            ],
+            "options": {
+                "cwd": "C:\\ProgramData\\chocolatey\\bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ],
+    "version": "2.0.0"
+}
