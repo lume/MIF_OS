@@ -8,6 +8,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 char CheckIfMnemo(char* str);
 char CheckIfDirct(char* str);
@@ -19,6 +20,8 @@ void compile_ORG(char* line);
 void compile_LABEL(char* line);
 void compile_DATA(char* line);
 void compile_MDATA(char* line);
+
+void undefinedLabel(char* label);
 
 // Opcodes
 #define STOP_OPC 0
@@ -65,13 +68,16 @@ const char* mnems[] = {"stop", "load", "store", "add", "sub", "jz", "jnz", "jl",
 "jle", "jg", "jge", "jmp", "div", "mod", "push", "pop", "inc", "dec"};
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
+const char* jumps[] = {"jz", "jnz", "jl", "jle", "jg", "jge", "jmp"};
+int jmplen = sizeof(jumps)/sizeof(jumps[0]);
+
 // List of directives
 const char* dircts[] = {"org", "label", "data", "mdata"};
 int dirctLen = sizeof(dircts)/sizeof(dircts[0]);
 
 // Compiler config
 uint32_t src_counter = 0; // position from which the code starts
-std::vector<uint32_t> code;  // code segment
+std::vector<int> code;  // code segment
 std::map<std::string, int> labels;
 
 char* CompileToMemory(char* sourceFile)
@@ -101,7 +107,7 @@ char* CompileToMemory(char* sourceFile)
 
         if(CheckIfDirct(token) == 1)
             ParseDirct(token, temp); //TODO: Add temp string as param here
-        if(CheckIfMnemo(token) == 1)
+        else if(CheckIfMnemo(token) == 1)
             ParseMnemo(token, temp); // TODO: Add temp string as param here
     }
 
@@ -154,8 +160,28 @@ void ParseDirct(char* dirct, char* line)
 void ParseMnemo(char* mnemo, char* line)
 {
     //printf("Parsing mnemo: %s\n", mnemo);
+    char delim[] = " ";
+    char* mnemToken = strtok(line, delim);
 
-}
+    for(int i = 0; i < jmplen; i++)
+    {
+        if(strcmp(mnemToken, jumps[i]) == 0)
+        {
+            //it is a jump, now check if label is correct
+            char* jumpTarget = strtok(NULL, delim);
+            if(labels.find(jumpTarget) == labels.end())
+            {
+                //not found
+                undefinedLabel(jumpTarget);
+                
+            }
+            else
+            {
+
+            }
+        }
+    }
+}   
 
 void compile_ORG(char* line)
 {
@@ -184,7 +210,9 @@ void compile_LABEL(char* line)
     char* orgToken = strtok(line, delim);
     std::string paramToken = strtok(NULL, delim);
 
-    printf("%s %s\n", orgToken, paramToken);
+    //NOTE: Passing std::string to printf prints 0c..
+    //printf("%s %s\n", orgToken, paramToken);
+    //std::cout<< paramToken << std::endl;
     if(labels.find(paramToken) == labels.end())
     {
         //not found, adding label to our label list
@@ -200,7 +228,32 @@ void compile_LABEL(char* line)
 
 void compile_DATA(char* line)
 {
+    //TODO: read about data segments more 
+    char delim[] = " ";
+    char* orgToken = strtok(line, delim);
+    std::string paramToken = strtok(NULL, delim);
 
+    for(int i = 0; i < paramToken.length(); i++)
+    {
+        if(paramToken[i] != '\n')
+            code.insert(code.end(), (int)paramToken[i] -0x30);
+    }
+
+    printf("[");
+    std::for_each(code.begin(), code.end(),[](int i){
+        printf("%d,", i);
+    });
+    printf("]");
 }
 
-void compile_MDATA(char* line){}
+void compile_MDATA(char* line)
+{
+    // Won't be implementing this for now
+    printf("mdata is not implemented");
+}
+
+void undefinedLabel(char* label)
+{
+    std::string newLabel = strcat("?", label);
+    std::cout << newLabel << std::endl;
+}
