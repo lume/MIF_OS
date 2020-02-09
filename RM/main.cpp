@@ -5,9 +5,11 @@
 //TODO: Implement the compiler
 //TODO: Write a make file
 
-int main()
+int main(int argc, char** argv)
 {   
-    int k = 10;
-    CompileToMemory("01.asm");
+    if(argc == 1)
+        printf("no file provided %d", argc);
+    
+    CompileToMemory(argv[1]);
     return 0;
 }

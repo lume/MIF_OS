@@ -3,12 +3,12 @@
         {
             "type": "shell",
             "label": "gcc.exe build active file",
-            "command": "C:\\ProgramData\\chocolatey\\bin\\gcc.exe",
+            "command": "C:\\ProgramData\\chocolatey\\bin\\g++.exe",
             "args": [
                 "-g",
-                "${workspaceFolder}\\RM\\main.c",
-                "${workspaceFolder}\\RM\\compiler.c",
-                "${workspaceFolder}\\RM\\cpu.c",
+                "${workspaceFolder}\\RM\\main.cpp",
+                "${workspaceFolder}\\RM\\compiler.cpp",
+                "${workspaceFolder}\\RM\\cpu.cpp",
                 "-o",
                 "${workspaceFolder}\\RM\\test.exe"
             ],
