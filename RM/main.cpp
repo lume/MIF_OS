@@ -13,5 +13,15 @@ int main(int argc, char** argv)
     printf("Compiling %s", argv[1]);
     std::vector<int> machineCode = CompileToMemory(argv[1]);
 
+    printf("Loading the program to the RAM\n");
+    LoadProgram(machineCode);
+
+    printf("RAM before execution:\n");
+    ShowRam();
+    printf("Executing program:\n");
+    ExecuteProgram();
+    printf("RAM after execution:\n");
+    ShowRam();
+
     return 0;
 }

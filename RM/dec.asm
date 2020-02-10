@@ -1,6 +1,3 @@
-load 100
-dec
-store 69
-load 10
+load 1
 inc
-stop
+store 2
