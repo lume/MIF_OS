@@ -333,13 +333,14 @@ void Decode(uint16_t instruction)
 
 void ShowRam()
 {
+    //TODO: rework
     printf("Showing what's inside of RAM:\n");
 
     printf("[");
-    for(int i = 0; i < RAM_SIZE; i++)
+    /*for(int i = 0; i < RAM_SIZE; i++)
     {
         printf("%d, ", RAM[i]);
-    }
+    }*/
     printf("]");
 }
 
