@@ -2,13 +2,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
 
 void Fetch();
 void Decode(uint16_t instruction);
 
 // RAM definition
-#define RAM_SIZE 128
-uint16_t RAM[RAM_SIZE] = {0};
+std::vector<int> RAM;
 
 // Register definition
 uint16_t pc = 0x0;   // program counter
@@ -343,8 +343,10 @@ void ShowRam()
     printf("]");
 }
 
-void LoadProgram(char* machineCode)
-{}
+void LoadProgram(std::vector<int> machineCode)
+{
+    
+}
 
 void ExecuteProgram()
 {}

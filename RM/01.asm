@@ -1,6 +1,6 @@
     load 30
     dec
-    jge  daugiau
+    jge daugiau
     store 31
     jmp pab  
     label daugiau
@@ -12,4 +12,3 @@
     data 100
     data 0
     data 0  
-   
