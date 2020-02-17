@@ -2,13 +2,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <array>
+#include <algorithm>
 
 void Fetch();
 void Decode(uint16_t instruction);
 
 // RAM definition
-#define RAM_SIZE 128
-uint16_t RAM[RAM_SIZE] = {0};
+#define RAM_SIZE 32
+std::array<int, RAM_SIZE> RAM = {0};
 
 // Register definition
 uint16_t pc = 0x0;   // program counter
@@ -260,7 +262,7 @@ void UNDEFINED()
 void Fetch()
 {
     ir = RAM[pc];
-    printf("instruction-> %d", ir); // printing to make better understanding of what's going on
+    printf("instruction-> %d\n", ir); // printing to make better understanding of what's going on
     Decode(ir);
 }
 
@@ -333,18 +335,42 @@ void Decode(uint16_t instruction)
 
 void ShowRam()
 {
-    printf("Showing what's inside of RAM:\n");
-
     printf("[");
     for(int i = 0; i < RAM_SIZE; i++)
     {
         printf("%d, ", RAM[i]);
     }
     printf("]");
+
+    if(zf)
+        printf("zero flag is set!\n");
+    if(sf)
+        printf("sign flag is set!\n");
 }
 
-void LoadProgram(char* machineCode)
-{}
+void LoadProgram(std::vector<int> machineCode)
+{  
+    //For now we do not allow to have programs bigger than our RAM
+    if(machineCode.size() > RAM_SIZE)
+    {
+        printf("Not enough RAM space for this program!");
+        exit(1);
+    }
+    else
+    {
+        //std::copy(machineCode.begin(), machineCode.end(), RAM);
+        for(int i = 0; i < machineCode.size(); i++)
+        {
+            RAM[i] = machineCode[i];
+        }
+        //std::copy_n(machineCode.begin(), RAM_SIZE, RAM.begin());
+    }
+}
 
 void ExecuteProgram()
-{}
+{
+    while(RAM[pc] != 0)
+    {
+        Fetch();
+    }
+}

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <map>
-#include <string>
+//#include <string>
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -21,7 +21,12 @@ void compile_LABEL(char* line);
 void compile_DATA(char* line);
 void compile_MDATA(char* line);
 
-void undefinedLabel(char* label);
+int getOpcode(char* mnem);
+int getOpSize(char* mnem);
+
+std::string stripString(char* str);
+
+std::string undefinedLabel(char* label);
 
 // Opcodes
 #define STOP_OPC 0
@@ -80,7 +85,7 @@ uint32_t src_counter = 0; // position from which the code starts
 std::vector<int> code;  // code segment
 std::map<std::string, int> labels;
 
-char* CompileToMemory(char* sourceFile)
+std::vector<int> CompileToMemory(char* sourceFile)
 {
     char line[64];
     char* nread;
@@ -100,20 +105,36 @@ char* CompileToMemory(char* sourceFile)
     // 2. Parsing the assembly code line-by-line
     while((nread = fgets(line, len, stream)) != NULL)
     {
+        if(strcmp(nread, "") == 0 || strcmp(nread, "\n") == 0) 
+            continue;
+
+        printf("\n%s\n", nread);
+        if(nread[strlen(nread)-1] == '\n')
+        {
+            nread[strlen(nread)-1] = '\0';
+        }
+
         strcpy(temp, nread);
         token = strtok(nread, delim);
+
         for(int i = 0; token[i]; i++)
             token[i] = tolower(token[i]);
 
         if(CheckIfDirct(token) == 1)
-            ParseDirct(token, temp); //TODO: Add temp string as param here
+            ParseDirct(token, temp); 
         else if(CheckIfMnemo(token) == 1)
-            ParseMnemo(token, temp); // TODO: Add temp string as param here
+            ParseMnemo(token, temp); 
     }
 
     // Closing operation
     fclose(stream);
-    return NULL;
+    printf("\n\nFinal compilation result: \n");
+    printf("[");
+        std::for_each(code.begin(), code.end(),[](int i){
+            printf("%d,", i);
+        });
+    printf("]");
+    return code;
 }
 
 char CheckIfMnemo(char* str)
@@ -172,15 +193,58 @@ void ParseMnemo(char* mnemo, char* line)
             if(labels.find(jumpTarget) == labels.end())
             {
                 //not found
-                undefinedLabel(jumpTarget);
+                std::string undefLabel = undefinedLabel(jumpTarget);
+                std::cout << undefLabel << std::endl;
                 
+                //insert jump instruction into code
+                int opcode = getOpcode(mnemToken);
+                code.insert(code.end(), opcode);
+
+                //insert undefined label into code
+                for(int i = 0; i < undefLabel.length(); i++)
+                {
+                    code.insert(code.end(), undefLabel[i]);
+                }
+
+                printf("[");
+                std::for_each(code.begin(), code.end(),[](int i){
+                    printf("%d,", i);
+                });
+                printf("]");
             }
             else
             {
+                //insert jump instruction into code
+                int opcode = getOpcode(mnemToken);
+                code.insert(code.end(), opcode);
 
+                int counterDiff = labels.at(jumpTarget) - (src_counter + 2); // This line may throw an exception
+                code.insert(code.end(), opcode);
+                code.insert(code.end(), counterDiff);
             }
+            int opsize = getOpSize(mnemToken);
+            src_counter += opsize;
+            return;
         }
     }
+
+    // This is not a jump
+    int opcode = getOpcode(mnemToken);
+    code.insert(code.end(), opcode);
+    int opsize = getOpSize(mnemToken);
+    if(opsize > 1)
+    {
+        char* arg = strtok(NULL, delim);
+        code.insert(code.end(), atoi(arg));
+    }
+    src_counter += opsize;
+
+     printf("[");
+        std::for_each(code.begin(), code.end(),[](int i){
+            printf("%d,", i);
+        });
+    printf("]");
+    return;
 }   
 
 void compile_ORG(char* line)
@@ -202,7 +266,7 @@ void compile_ORG(char* line)
         src_counter = paramToken;
     }
 }
-
+//TODO: Write a function to strip down \n in the end of string
 void compile_LABEL(char* line)
 {
     //TODO: Read about the possibility to refactor strtok in cpp
@@ -217,6 +281,11 @@ void compile_LABEL(char* line)
     {
         //not found, adding label to our label list
         labels.insert({paramToken, src_counter});
+
+        for(auto it = labels.cbegin(); it != labels.cend(); ++it)
+        {
+            std::cout << it->first << " " << it->second << std::endl; 
+        }
     }
     else
     {
@@ -252,8 +321,91 @@ void compile_MDATA(char* line)
     printf("mdata is not implemented");
 }
 
-void undefinedLabel(char* label)
+std::string undefinedLabel(char* label)
 {
-    std::string newLabel = strcat("?", label);
-    std::cout << newLabel << std::endl;
+    std::string newLabel = "?";
+    newLabel += label;
+    return newLabel;
+}
+
+int getOpcode(char* mnem)
+{
+    if(strcmp(mnem, "stop") == 0)
+        return STOP_OPC;
+    if(strcmp(mnem, "load") == 0)
+        return LOAD_OPC;
+    if(strcmp(mnem, "store") == 0)
+        return STORE_OPC;
+    if(strcmp(mnem, "add") == 0)
+        return ADD_OPC;
+    if(strcmp(mnem, "sub") == 0)
+        return SUB_OPC;
+    if(strcmp(mnem, "jz") == 0)
+        return JZ_OPC;
+    if(strcmp(mnem, "jnz") == 0)
+        return JNZ_OPC;
+    if(strcmp(mnem, "jl") == 0)
+        return JL_OPC;
+    if(strcmp(mnem, "jle") == 0)
+        return JLE_OPC;
+    if(strcmp(mnem, "jg") == 0)
+        return JG_OPC;
+    if(strcmp(mnem, "jge") == 0)
+        return JGE_OPC;
+    if(strcmp(mnem, "jmp") == 0)
+        return JMP_OPC;
+    if(strcmp(mnem, "div") == 0)
+        return DIV_OPC;
+    if(strcmp(mnem, "mod") == 0)
+        return MOD_OPC;
+    if(strcmp(mnem, "push") == 0)
+        return PUSH_OPC;
+    if(strcmp(mnem, "pop") == 0)
+        return POP_OPC;
+    if(strcmp(mnem, "inc") == 0)
+        return INC_OPC;
+    if(strcmp(mnem, "dec") == 0)
+        return DEC_OPC;
+    return 999;
+}
+
+int getOpSize(char* mnem)
+{
+    if(strcmp(mnem, "stop") == 0)
+        return STOP_SIZE;
+    if(strcmp(mnem, "load") == 0)
+        return LOAD_SIZE;
+    if(strcmp(mnem, "store") == 0)
+        return STORE_SIZE;
+    if(strcmp(mnem, "add") == 0)
+        return ADD_SIZE;
+    if(strcmp(mnem, "sub") == 0)
+        return SUB_SIZE;
+    if(strcmp(mnem, "jz") == 0)
+        return JZ_SIZE;
+    if(strcmp(mnem, "jnz") == 0)
+        return JNZ_SIZE;
+    if(strcmp(mnem, "jl") == 0)
+        return JL_SIZE;
+    if(strcmp(mnem, "jle") == 0)
+        return JLE_SIZE;
+    if(strcmp(mnem, "jg") == 0)
+        return JG_SIZE;
+    if(strcmp(mnem, "jge") == 0)
+        return JGE_SIZE;
+    if(strcmp(mnem, "jmp") == 0)
+        return JMP_SIZE;
+    if(strcmp(mnem, "div") == 0)
+        return DIV_SIZE;
+    if(strcmp(mnem, "mod") == 0)
+        return MOD_SIZE;
+    if(strcmp(mnem, "push") == 0)
+        return PUSH_SIZE;
+    if(strcmp(mnem, "pop") == 0)
+        return POP_SIZE;
+    if(strcmp(mnem, "inc") == 0)
+        return INC_SIZE;
+    if(strcmp(mnem, "dec") == 0)
+        return DEC_SIZE;
+    return 999;
 }

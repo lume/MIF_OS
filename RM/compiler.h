@@ -1,6 +1,5 @@
-#ifndef COMPILER_H
-#define COMPILER_H
+#pragma once
 
-char* CompileToMemory(char* sourceFile);
+#include <vector>
 
-#endif
+std::vector<int> CompileToMemory(char* sourceFile);

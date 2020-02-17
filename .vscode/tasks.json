@@ -10,7 +10,8 @@
                 "${workspaceFolder}\\RM\\compiler.cpp",
                 "${workspaceFolder}\\RM\\cpu.cpp",
                 "-o",
-                "${workspaceFolder}\\RM\\test.exe"
+                "${workspaceFolder}\\RM\\test.exe",
+                "-std=c++17"
             ],
             "options": {
                 "cwd": "C:\\ProgramData\\chocolatey\\bin"
