@@ -69,10 +69,6 @@ CMP [Addr]
 CMP imm  
 CMP REG  
 
-MMU:
-TLB for hardware memory paging
-//TODO: add TLB design
-
 # Memory and its segments
 
 Planned RAM size: 65536 bytes (64K)  
@@ -111,12 +107,20 @@ Additionally, making this component control the swap is planned as well.
 On boot, the empty system is planned to provide a primitive command prompt.
 
 # CPU Scheduling
-//TODO: Design the CPU scheduling. Probably won't be using RR
-TODO: read  more about scheduling 
-The planned cpu scheduling algorithm would be round robin (rr).
 
-MLFQ - currently it does look like a RR with ability to assign priorities to each process. looks pretty decent
+The CPU scheduling will rely on MLFQ Algorithm:
 
+We'll have three queues:
+Q1: RR with time quantum of 4
+Q2: RR with time quantum of 7
+Q3: RR with time quantum of 10
 
+- Rule 1:If Priority(A)>Priority(B), A runs (B doesn’t).
+- Rule 2:If Priority(A)=Priority(B), A & B run in round-robin fashion using the time slice (quantum length) of the given queue.
+- Rule 3:When a job enters the system, it is placed at the highest priority (the topmost queue).
+- Rule 4:Once a job uses up its time allotment at a given level (re-gardless of how many times it has given up the CPU), its priority is reduced (i.e., it moves down one queue).
+- Rule 5:After some time periods, move all the jobs in the system to the topmost queue.
 
-06:45 - 07:05 
+Some notes on Round Robin:
+Split tasks into time slices, and switch between them. It improves the response time, but will worsen the turnaround time.
+
