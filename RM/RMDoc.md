@@ -8,6 +8,7 @@
 - MEMCONTROL
 - IOCONTROL
 - Boot and operations
+- CPU Scheduling
 
 
 # CPU and its ISA & Registers
@@ -22,9 +23,6 @@ IR (Instruction Register) uint16_t
 PC (Program Counter) uint16_t  
 SP (Stack Pointer) uint16_t  
 Flags {Zero, Sign, Carry, Debug, Lower}  
-
-maybe will be added:
-TLB for hardware memory paging
 
 ISA:  
 LD [Addr]  
@@ -71,12 +69,14 @@ CMP [Addr]
 CMP imm  
 CMP REG  
 
+MMU:
+TLB for hardware memory paging
+//TODO: add TLB design
+
 # Memory and its segments
 
 Planned RAM size: 65536 bytes (64K)  
-CODE -> 40 K
-DATA -> 8 K  
-STACK -> 4 K  
+ 
 RESERVED -> 12 K  
 
 DISK:
@@ -109,3 +109,14 @@ Additionally, making this component control the swap is planned as well.
 # Boot and operations
 
 On boot, the empty system is planned to provide a primitive command prompt.
+
+# CPU Scheduling
+//TODO: Design the CPU scheduling. Probably won't be using RR
+TODO: read  more about scheduling 
+The planned cpu scheduling algorithm would be round robin (rr).
+
+MLFQ - currently it does look like a RR with ability to assign priorities to each process. looks pretty decent
+
+
+
+06:45 - 07:05 
