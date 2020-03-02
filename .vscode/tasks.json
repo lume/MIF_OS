@@ -7,7 +7,6 @@
             "args": [
                 "-g",
                 "${workspaceFolder}\\RM\\main.cpp",
-                "${workspaceFolder}\\RM\\compiler.cpp",
                 "${workspaceFolder}\\RM\\cpu.cpp",
                 "-o",
                 "${workspaceFolder}\\RM\\test.exe",

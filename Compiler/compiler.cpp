@@ -147,7 +147,7 @@ void CompileToFile(char* sourceFile, std::string output)
     std::ofstream ofile(output);
 
     std::stringstream machineCodeString;
-    std::copy(machineCode.begin(), machineCode.end(), std::ostream_iterator<int>(machineCodeString, ""));
+    std::copy(machineCode.begin(), machineCode.end(), std::ostream_iterator<int>(machineCodeString, " "));
 
     ofile << machineCodeString.str().c_str();
     ofile.close();

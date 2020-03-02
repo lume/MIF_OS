@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <array>
 #include <algorithm>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <string.h>
 
 // Flag definition
 enum
@@ -333,10 +338,42 @@ void Cpu::ShowRam()
         printf("sign flag is set!\n");
 }
 
-void Cpu::LoadProgram(std::vector<int> machineCode)
+void Cpu::LoadProgram(std::string filename)
 { 
     //TODO: Rework program loading so it handles virtual memory correctly
     //For now we do not allow to have programs bigger than our RAM
+    std::vector<int> machineCode;
+    std::stringstream tempStream;
+    std::ifstream ifile(filename);
+
+    if(ifile)
+    {
+        tempStream << ifile.rdbuf();
+        ifile.close();
+        char* tempString = strdup(tempStream.str().c_str());
+        char* ch = strtok(tempString, " ");
+
+        while(ch != NULL)
+        {
+            machineCode.push_back(atoi(ch));
+            ch = strtok(NULL, " ");
+            printf("%c", ch);
+        }
+    }
+    else
+    {
+        printf("Failed to a program to launch: %s", strerror(errno));
+        exit(1);
+    }
+    
+
+    printf("\n");
+
+    for(int i = 0; i < machineCode.size(); i++)
+    {
+        printf("%d", machineCode[i]);
+    }
+
     if(machineCode.size() > RAM_SIZE)
     {
         printf("Not enough RAM space for this program!");

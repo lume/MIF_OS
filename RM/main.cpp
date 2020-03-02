@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
     Cpu cpu = Cpu();
 
-    cpu.LoadProgram("test");
+    cpu.LoadProgram("out.txt");
 
     printf("RAM before execution:\n");
     cpu.ShowRam();

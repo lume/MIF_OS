@@ -9,7 +9,7 @@ class Cpu
     public:
         Cpu(){}
         void ShowRam(); // Show the contents of the RAM
-        void LoadProgram(std::string filename);// Load the Program machine code to the memory // TODO: rework this function so it loads a program from a file
+        void LoadProgram(std::string filename);// Load the Program machine code to the memory
         void ExecuteProgram(); // Execute the loaded program
 
     private:
