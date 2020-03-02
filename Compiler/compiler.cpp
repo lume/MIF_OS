@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iterator>
 
 char CheckIfMnemo(char* str);
 char CheckIfDirct(char* str);
@@ -135,6 +138,19 @@ std::vector<int> CompileToMemory(char* sourceFile)
         });
     printf("]");
     return code;
+}
+
+void CompileToFile(char* sourceFile, std::string output)
+{
+    std::vector<int> machineCode = CompileToMemory(sourceFile);
+
+    std::ofstream ofile(output);
+
+    std::stringstream machineCodeString;
+    std::copy(machineCode.begin(), machineCode.end(), std::ostream_iterator<int>(machineCodeString, ""));
+
+    ofile << machineCodeString.str().c_str();
+    ofile.close();
 }
 
 char CheckIfMnemo(char* str)

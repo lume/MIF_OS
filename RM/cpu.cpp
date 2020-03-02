@@ -243,6 +243,7 @@ void Cpu::UNDEFINED()
     printf("UNDEFINED INSTRUCTION CODE");
     exit(0);
 }
+
 // get the next instruction
 void Cpu::Fetch()
 {
@@ -333,7 +334,8 @@ void Cpu::ShowRam()
 }
 
 void Cpu::LoadProgram(std::vector<int> machineCode)
-{  
+{ 
+    //TODO: Rework program loading so it handles virtual memory correctly
     //For now we do not allow to have programs bigger than our RAM
     if(machineCode.size() > RAM_SIZE)
     {
@@ -342,12 +344,10 @@ void Cpu::LoadProgram(std::vector<int> machineCode)
     }
     else
     {
-        //std::copy(machineCode.begin(), machineCode.end(), RAM);
         for(int i = 0; i < machineCode.size(); i++)
         {
             RAM[i] = machineCode[i];
         }
-        //std::copy_n(machineCode.begin(), RAM_SIZE, RAM.begin());
     }
 }
 

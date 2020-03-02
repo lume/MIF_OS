@@ -1,5 +1,5 @@
 #pragma once 
-#include <vector>
+#include <string>
 #include <array>
 
 #define RAM_SIZE 32 
@@ -9,7 +9,7 @@ class Cpu
     public:
         Cpu(){}
         void ShowRam(); // Show the contents of the RAM
-        void LoadProgram(std::vector<int> machineCode);// Load the Program machine code to the memory
+        void LoadProgram(std::string filename);// Load the Program machine code to the memory // TODO: rework this function so it loads a program from a file
         void ExecuteProgram(); // Execute the loaded program
 
     private:
