@@ -266,17 +266,13 @@ void compile_ORG(char* line)
         src_counter = paramToken;
     }
 }
-//TODO: Write a function to strip down \n in the end of string
+
 void compile_LABEL(char* line)
 {
-    //TODO: Read about the possibility to refactor strtok in cpp
     char delim[] = " ";
     char* orgToken = strtok(line, delim);
     std::string paramToken = strtok(NULL, delim);
 
-    //NOTE: Passing std::string to printf prints 0c..
-    //printf("%s %s\n", orgToken, paramToken);
-    //std::cout<< paramToken << std::endl;
     if(labels.find(paramToken) == labels.end())
     {
         //not found, adding label to our label list
@@ -297,7 +293,6 @@ void compile_LABEL(char* line)
 
 void compile_DATA(char* line)
 {
-    //TODO: read about data segments more 
     char delim[] = " ";
     char* orgToken = strtok(line, delim);
     std::string paramToken = strtok(NULL, delim);

@@ -2,7 +2,6 @@
 #include "cpu.h"
 #include "compiler.h"
 
-//TODO: Implement the compiler
 //TODO: Write a make file
 
 int main(int argc, char** argv)
@@ -14,14 +13,17 @@ int main(int argc, char** argv)
     std::vector<int> machineCode = CompileToMemory(argv[1]);
 
     printf("Loading the program to the RAM\n");
-    LoadProgram(machineCode);
+
+    Cpu cpu = Cpu();
+
+    cpu.LoadProgram(machineCode);
 
     printf("RAM before execution:\n");
-    ShowRam();
+    cpu.ShowRam();
     printf("Executing program:\n");
-    ExecuteProgram();
+    cpu.ExecuteProgram();
     printf("RAM after execution:\n");
-    ShowRam();
+    cpu.ShowRam();
 
     return 0;
 }
