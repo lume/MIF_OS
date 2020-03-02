@@ -4,21 +4,11 @@
 #include <stdio.h>
 #include <array>
 #include <algorithm>
-
-void Fetch();
-void Decode(uint16_t instruction);
-
-// RAM definition
-#define RAM_SIZE 32
-std::array<int, RAM_SIZE> RAM = {0};
-
-// Register definition
-uint16_t pc = 0x0;   // program counter
-uint16_t addr = 0x0; // internal addr register
-uint16_t acc = 0x0;   // accumulator
-uint16_t ir = 0x0;   // instruction register
-uint16_t sp = RAM_SIZE - 1; // stack pointer 
-uint16_t fs = 0x0;
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <string.h>
 
 // Flag definition
 enum
@@ -50,12 +40,12 @@ enum
     DEC
 };
 
-void OP_STOP()
+void Cpu::OP_STOP()
 {
     exit(0);
 }
 
-void OP_LOAD()
+void Cpu::OP_LOAD()
 {
     pc++;
     addr = RAM[pc];
@@ -63,7 +53,7 @@ void OP_LOAD()
     pc++;
 }
 
-void OP_STORE()
+void Cpu::OP_STORE()
 {
     pc++;
     addr = RAM[pc];
@@ -71,7 +61,7 @@ void OP_STORE()
     pc++;
 }
 
-void OP_ADD()
+void Cpu::OP_ADD()
 {
     pc++;
     addr = RAM[pc];
@@ -83,7 +73,7 @@ void OP_ADD()
     pc++;
 }
 
-void OP_SUB()
+void Cpu::OP_SUB()
 {
     pc++;
     addr = RAM[pc];
@@ -95,7 +85,7 @@ void OP_SUB()
     pc++;
 }
 
-void OP_JZ()
+void Cpu::OP_JZ()
 {
     pc++;
     if(zf)
@@ -110,7 +100,7 @@ void OP_JZ()
     }
 }
 
-void OP_JNZ()
+void Cpu::OP_JNZ()
 {
     pc++;
     if(!zf)
@@ -125,7 +115,7 @@ void OP_JNZ()
     }
 }
 
-void OP_JL()
+void Cpu::OP_JL()
 {
     pc++;
     if(sf)
@@ -140,7 +130,7 @@ void OP_JL()
     }
 }
 
-void OP_JLE()
+void Cpu::OP_JLE()
 {
     pc++;
     if(sf || zf)
@@ -155,7 +145,7 @@ void OP_JLE()
     }
 }
 
-void OP_JG()
+void Cpu::OP_JG()
 {
     pc++;
     if(!sf)
@@ -170,7 +160,7 @@ void OP_JG()
     } 
 }
 
-void OP_JGE()
+void Cpu::OP_JGE()
 {
     pc++;
     if(!sf || zf)
@@ -185,7 +175,7 @@ void OP_JGE()
     }
 }
 
-void OP_JMP()
+void Cpu::OP_JMP()
 {
     pc++;
     int offset = RAM[pc];
@@ -193,7 +183,7 @@ void OP_JMP()
     pc += offset;
 }
 
-void OP_DIV()
+void Cpu::OP_DIV()
 {
     pc++;
     addr = RAM[pc];
@@ -205,7 +195,7 @@ void OP_DIV()
     pc++;
 }
 
-void OP_MOD()
+void Cpu::OP_MOD()
 {
     pc++;
     addr = RAM[pc];
@@ -217,7 +207,7 @@ void OP_MOD()
     pc++;
 }
 
-void OP_PUSH()
+void Cpu::OP_PUSH()
 {
     pc++;
     addr = sp;
@@ -225,7 +215,7 @@ void OP_PUSH()
     sp -= 1;
 }
 
-void OP_POP()
+void Cpu::OP_POP()
 {
     pc++;
     sp++;
@@ -233,7 +223,7 @@ void OP_POP()
     acc = RAM[addr];
 }
 
-void OP_INC()
+void Cpu::OP_INC()
 {
     pc++;
     acc++;
@@ -243,7 +233,7 @@ void OP_INC()
         fs |= zf;
 }
 
-void OP_DEC()
+void Cpu::OP_DEC()
 {
     pc++;
     acc--;
@@ -253,23 +243,23 @@ void OP_DEC()
         fs |= zf;
 }
 
-void UNDEFINED()
+void Cpu::UNDEFINED()
 {
     printf("UNDEFINED INSTRUCTION CODE");
     exit(0);
 }
+
 // get the next instruction
-void Fetch()
+void Cpu::Fetch()
 {
     ir = RAM[pc];
     printf("instruction-> %d\n", ir); // printing to make better understanding of what's going on
-    Decode(ir);
 }
 
 // decode the instruction 
-void Decode(uint16_t instruction)
+void Cpu::Decode()
 {
-    switch (instruction)
+    switch (ir)
     {
     case(STOP):
         OP_STOP();
@@ -333,7 +323,7 @@ void Decode(uint16_t instruction)
 
 // public functions
 
-void ShowRam()
+void Cpu::ShowRam()
 {
     printf("[");
     for(int i = 0; i < RAM_SIZE; i++)
@@ -348,9 +338,42 @@ void ShowRam()
         printf("sign flag is set!\n");
 }
 
-void LoadProgram(std::vector<int> machineCode)
-{  
+void Cpu::LoadProgram(std::string filename)
+{ 
+    //TODO: Rework program loading so it handles virtual memory correctly
     //For now we do not allow to have programs bigger than our RAM
+    std::vector<int> machineCode;
+    std::stringstream tempStream;
+    std::ifstream ifile(filename);
+
+    if(ifile)
+    {
+        tempStream << ifile.rdbuf();
+        ifile.close();
+        char* tempString = strdup(tempStream.str().c_str());
+        char* ch = strtok(tempString, " ");
+
+        while(ch != NULL)
+        {
+            machineCode.push_back(atoi(ch));
+            ch = strtok(NULL, " ");
+            printf("%c", ch);
+        }
+    }
+    else
+    {
+        printf("Failed to a program to launch: %s", strerror(errno));
+        exit(1);
+    }
+    
+
+    printf("\n");
+
+    for(int i = 0; i < machineCode.size(); i++)
+    {
+        printf("%d", machineCode[i]);
+    }
+
     if(machineCode.size() > RAM_SIZE)
     {
         printf("Not enough RAM space for this program!");
@@ -358,19 +381,18 @@ void LoadProgram(std::vector<int> machineCode)
     }
     else
     {
-        //std::copy(machineCode.begin(), machineCode.end(), RAM);
         for(int i = 0; i < machineCode.size(); i++)
         {
             RAM[i] = machineCode[i];
         }
-        //std::copy_n(machineCode.begin(), RAM_SIZE, RAM.begin());
     }
 }
 
-void ExecuteProgram()
+void Cpu::ExecuteProgram()
 {
     while(RAM[pc] != 0)
     {
         Fetch();
+        Decode();
     }
 }
