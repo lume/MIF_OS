@@ -45,7 +45,7 @@ void Cpu::OP_STOP()
     exit(0);
 }
 
-void Cpu::OP_LOAD()
+void Cpu::OP_LOADA()
 {
     pc++;
     addr = RAM[pc];
@@ -53,7 +53,7 @@ void Cpu::OP_LOAD()
     pc++;
 }
 
-void Cpu::OP_STORE()
+void Cpu::OP_STOREA()
 {
     pc++;
     addr = RAM[pc];
@@ -61,10 +61,21 @@ void Cpu::OP_STORE()
     pc++;
 }
 
-void Cpu::OP_ADD()
+void Cpu::OP_ADDA()
 {
     pc++;
     addr = RAM[pc];
+    acc += RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ADDI()
+{
+    pc++;
     acc += RAM[pc];
     if(acc < 0)
         fs |= sf;
@@ -73,7 +84,7 @@ void Cpu::OP_ADD()
     pc++;
 }
 
-void Cpu::OP_SUB()
+void Cpu::OP_SUBA()
 {
     pc++;
     addr = RAM[pc];
@@ -165,7 +176,8 @@ void Cpu::OP_JGE()
     pc++;
     if(!sf || zf)
     {
-        int offset = RAM[pc];
+            //TODO: Add a check for overflow.
+        int offset = RAM[pc]; // TODO: replace int with uint8 for jumps, reserve uint16 for call
         pc++;
         pc += offset;
     }
@@ -183,7 +195,7 @@ void Cpu::OP_JMP()
     pc += offset;
 }
 
-void Cpu::OP_DIV()
+void Cpu::OP_DIVA()
 {
     pc++;
     addr = RAM[pc];
