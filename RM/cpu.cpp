@@ -14,17 +14,31 @@
 enum
 {
     sf = 1 << 0,
-    zf = 1 << 1
+    zf = 1 << 1,
+    lf = 1 << 2
 };
 
 // Instruction definition
 enum
 {
     STOP = 0,
-    LOAD,
-    STORE,
-    ADD,
-    SUB,
+    LOADA,
+    LOADI,
+    LOADR,
+    STOREA,
+    STORER,
+    ADDA,
+    ADDI,
+    ADDR,
+    SUBA,
+    SUBI,
+    SUBR,
+    MULA,
+    MULI,
+    MULR,
+    DIVA,
+    DIVI,
+    DIVR,
     JZ,
     JNZ,
     JL,
@@ -32,12 +46,27 @@ enum
     JG,
     JGE,
     JMP,
-    DIV,
     MOD,
     PUSH,
     POP,
     INC,
-    DEC
+    DEC,
+    SHL,
+    SHR,
+    INT,
+    ANDA,
+    ANDI,
+    ANDR,
+    ORA,
+    ORI,
+    ORR,
+    XORA,
+    XORI,
+    XORR,
+    CMPA,
+    CMPI,
+    CMPR,
+    CALL
 };
 
 void Cpu::OP_STOP()
@@ -276,18 +305,52 @@ void Cpu::Decode()
     case(STOP):
         OP_STOP();
         break;
-    case(LOAD):
-        OP_LOAD();
+    case(LOADA):
+        OP_LOADA();
         break;
-    case(STORE):
-        OP_STORE();
+    case(LOADI):
+        OP_LOADI();
         break;
-    case(ADD):
-        OP_ADD();
+    case(LOADR):
+        OP_LOADR();
         break;
-    case(SUB):
-        OP_SUB();
+    case(STOREA):
+        OP_STOREA();
         break;
+    case(STORER):
+        OP_STORER();
+        break;
+    case(ADDA):
+        OP_ADDA();
+        break;
+    case(ADDI):
+        OP_ADDI();
+        break;
+    case(ADDR):
+        OP_ADDR();
+        break;
+    case(SUBA):
+        OP_SUBA();
+        break;
+    case(SUBI):
+        OP_SUBI();
+        break;
+    case(SUBR):
+        OP_SUBR();
+        break;
+    case(MULA):
+        OP_MULA();
+        break;
+    case(MULI):
+        OP_MULI();
+        break;
+    case(MULR):
+        OP_MULR();
+        break;
+    case(DIVA):
+        OP_DIVA();
+        break;
+    //TODO: Continue here
     case(JZ):
         OP_JZ();
         break;
