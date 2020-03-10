@@ -2,7 +2,7 @@
 #include <string>
 #include <array>
 
-#define RAM_SIZE 32 
+#define RAM_SIZE 48
 
 class Cpu
 {
