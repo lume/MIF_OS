@@ -82,11 +82,44 @@ void Cpu::OP_LOADA()
     pc++;
 }
 
+void Cpu::OP_LOADI()
+{
+    pc++;
+    acc = RAM[pc];
+    pc++;
+}
+
+void Cpu::OP_LOADR()
+{
+    pc++;
+    char c = RAM[pc];
+    
+    if(c == 'x')
+        acc = xReg;
+    else if(c == 'c')
+        acc = cReg;
+   
+    pc++;
+}
+
 void Cpu::OP_STOREA()
 {
     pc++;
     addr = RAM[pc];
     RAM[addr] = acc;
+    pc++;
+}
+
+void Cpu::OP_STORER()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg = acc;
+    else if(c == 'c')
+        cReg = acc;
+
     pc++;
 }
 
@@ -113,6 +146,23 @@ void Cpu::OP_ADDI()
     pc++;
 }
 
+void Cpu::OP_ADDR()
+{
+    pc++;  
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc += xReg;
+    else if(c == 'c')
+        acc += cReg;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
 void Cpu::OP_SUBA()
 {
     pc++;
@@ -125,12 +175,123 @@ void Cpu::OP_SUBA()
     pc++;
 }
 
+void Cpu::OP_SUBI()
+{
+    pc++;
+    acc += RAM[pc];
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_SUBR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc -= xReg;
+    else if(c == 'c')
+        acc -= cReg;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_MULA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc *= RAM[addr];
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_MULI()
+{
+    pc++;
+    acc *= RAM[pc];
+    
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_MULR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc *= xReg;
+    else if(c == 'c')
+        acc *= cReg;
+    
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_DIVA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc / RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_DIVI()
+{
+    pc++;
+    acc = acc / RAM[pc];
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_DIVR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc /= xReg;
+    else if(c == 'c')
+        acc /= cReg;
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
 void Cpu::OP_JZ()
 {
     pc++;
     if(zf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -145,7 +306,7 @@ void Cpu::OP_JNZ()
     pc++;
     if(!zf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -160,7 +321,7 @@ void Cpu::OP_JL()
     pc++;
     if(sf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -175,7 +336,7 @@ void Cpu::OP_JLE()
     pc++;
     if(sf || zf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -190,7 +351,7 @@ void Cpu::OP_JG()
     pc++;
     if(!sf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -205,8 +366,8 @@ void Cpu::OP_JGE()
     pc++;
     if(!sf || zf)
     {
-            //TODO: Add a check for overflow.
-        int offset = RAM[pc]; // TODO: replace int with uint8 for jumps, reserve uint16 for call
+        //TODO: Add a check for overflow.
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -219,21 +380,9 @@ void Cpu::OP_JGE()
 void Cpu::OP_JMP()
 {
     pc++;
-    int offset = RAM[pc];
+    uint8_t offset = RAM[pc];
     pc++;
     pc += offset;
-}
-
-void Cpu::OP_DIVA()
-{
-    pc++;
-    addr = RAM[pc];
-    acc = acc / RAM[addr];
-    if(acc < 0)
-        fs |= sf;
-    if(acc == 0)
-        fs |= zf;
-    pc++;
 }
 
 void Cpu::OP_MOD()
@@ -282,6 +431,197 @@ void Cpu::OP_DEC()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
+}
+
+void Cpu::OP_INT()
+{
+   //TODO: implement interrupts
+}
+
+void Cpu::OP_ANDA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc & RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ANDI()
+{
+    pc++;
+    acc = acc & RAM[pc];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ANDR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg &= acc;
+    else if(c == 'c')
+        cReg &= acc;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ORA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc | RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ORI()
+{
+    pc++;
+    acc = acc | RAM[pc];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ORR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg |= acc;
+    else if(c == 'c')
+        cReg |= acc;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_XORA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc ^ RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_XORI()
+{
+    pc++;
+    acc = acc ^ RAM[pc];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_XORR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg ^= acc;
+    else if(c == 'c')
+        cReg ^= acc;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CMPA()
+{
+    pc++;
+    addr = RAM[pc];
+    uint16_t val = RAM[addr];
+    
+    if(acc < val)
+        fs |= lf;
+    if(acc == val)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CMPI()
+{
+    pc++;
+    uint16_t val = RAM[pc];
+    
+    if(acc < val)
+        fs |= lf;
+    if(acc == val)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CMPR()
+{
+    pc++;
+    char c = RAM[pc];
+    uint16_t val;
+    
+    if(c == 'x')
+        val = xReg;
+    else if(c == 'c')
+        val = cReg;
+
+    if(acc < val)
+        fs |= lf;
+    if(acc == val)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CALL()
+{
+    pc++;
+    //TODO: add overflow check
+    uint16_t offset = RAM[pc];
+    pc++;
+    pc += offset;
+}
+
+void Cpu::OP_SHR()
+{
+    pc++;
+    acc >> RAM[pc];
+    pc++;
+}
+
+void Cpu::OP_SHL()
+{
+    pc++;
+    acc << RAM[pc];
+    pc++;
 }
 
 void Cpu::UNDEFINED()
@@ -350,7 +690,12 @@ void Cpu::Decode()
     case(DIVA):
         OP_DIVA();
         break;
-    //TODO: Continue here
+    case(DIVI):
+        OP_DIVI();
+        break;
+    case(DIVR):
+        OP_DIVR();
+        break;
     case(JZ):
         OP_JZ();
         break;
@@ -372,9 +717,6 @@ void Cpu::Decode()
     case(JMP):
         OP_JMP();
         break;
-    case(DIV):
-        OP_DIV();
-        break;
     case(MOD):
         OP_MOD();
         break;
@@ -389,6 +731,54 @@ void Cpu::Decode()
         break;
     case(DEC):
         OP_DEC();
+        break;
+    case(SHL):
+        OP_SHL();
+        break;
+    case(SHR):
+        OP_SHR();
+        break;
+    case(INT):
+        OP_INT();
+        break;
+    case(ANDA):
+        OP_ANDA();
+        break;
+    case(ANDI):
+        OP_ANDI();
+        break;
+    case(ANDR):
+        OP_ANDR();
+        break;
+    case(ORA):
+        OP_ORA();
+        break;
+    case(ORI):
+        OP_ORI();
+        break;
+    case(ORR):
+        OP_ORR();
+        break;
+    case(XORA):
+        OP_XORA();
+        break;
+    case(XORI):
+        OP_XORI();
+        break;
+    case(XORR):
+        OP_XORR();
+        break;
+    case(CMPA):
+        OP_CMPA();
+        break;
+    case(CMPI):
+        OP_CMPI();
+        break;
+    case(CMPR):
+        OP_CMPR();
+        break;
+    case(CALL):
+        OP_CALL();
         break;
     default:
         UNDEFINED();

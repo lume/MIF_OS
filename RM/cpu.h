@@ -36,8 +36,8 @@ class Cpu
         void OP_LOADR(); // load value from register
 
         // Stores
-        void OP_STOREA(); // store value at address
-        void OP_STORER(); // store value at register
+        void OP_STOREA(); // store value in accumulator at address
+        void OP_STORER(); // store value in accumulator at register
 
         // Adds
         void OP_ADDA(); // add value at address to accumulator
