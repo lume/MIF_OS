@@ -1,3 +1,4 @@
+//TODO: Test compilation
 #include "compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,30 +34,71 @@ std::string undefinedLabel(char* label);
 
 // Opcodes
 #define STOP_OPC 0
-#define LOAD_OPC 1
-#define STORE_OPC 2
-#define ADD_OPC 3
-#define SUB_OPC 4
-#define JZ_OPC 5
-#define JNZ_OPC 6
-#define JL_OPC 7
-#define JLE_OPC 8
-#define JG_OPC 9
-#define JGE_OPC 10
-#define JMP_OPC 11
-#define DIV_OPC 12
-#define MOD_OPC 13
-#define PUSH_OPC 14
-#define POP_OPC 15
-#define INC_OPC 16
-#define DEC_OPC 17
+#define LOADA_OPC 1
+#define LOADI_OPC 2
+#define LOADR_OPC 3
+#define STOREA_OPC 4
+#define STORER_OPC 5
+#define ADDA_OPC 6
+#define ADDI_OPC 7
+#define ADDR_OPC 8
+#define SUBA_OPC 9
+#define SUBI_OPC 10
+#define SUBR_OPC 11
+#define MULA_OPC 12
+#define MULI_OPC 13
+#define MULR_OPC 14
+#define DIVA_OPC 15
+#define DIVI_OPC 16
+#define DIVR_OPC 17
+#define JZ_OPC 18
+#define JNZ_OPC 19
+#define JL_OPC 20
+#define JLE_OPC 21
+#define JG_OPC 22
+#define JGE_OPC 23
+#define JMP_OPC 24
+#define MOD_OPC 25
+#define PUSH_OPC 26
+#define POP_OPC 27
+#define INC_OPC 28
+#define DEC_OPC 29
+#define SHL_OPC 30
+#define SHR_OPC 31
+#define INT_OPC 32
+#define ANDA_OPC 33
+#define ANDI_OPC 34
+#define ANDR_OPC 35
+#define ORA_OPC 36
+#define ORI_OPC 36
+#define ORR_OPC 36
+#define XORA_OPC 37
+#define XORI_OPC 38
+#define XORR_OPC 39
+#define CMPA_OPC 40
+#define CMPI_OPC 41
+#define CMPR_OPC 42
+#define CALL_OPC 43
 
 // Instruction sizes
 #define STOP_SIZE 1
-#define LOAD_SIZE 2
-#define STORE_SIZE 2
-#define ADD_SIZE 2
-#define SUB_SIZE 2
+#define LOADA_SIZE 2
+#define LOADI_SIZE 2
+#define LOADR_SIZE 2
+#define STOREA_SIZE 2
+#define STORER_SIZE 2
+#define ADDA_SIZE 2
+#define ADDI_SIZE 2
+#define ADDR_SIZE 2
+#define SUBA_SIZE 2
+#define SUBI_SIZE 2
+#define SUBR_SIZE 2
+#define MULA_SIZE 2
+#define MULI_SIZE 2
+#define MULR_SIZE 2
+#define DIVA_SIZE 2
+#define DIVI_SIZE 2
+#define DIVR_SIZE 2
 #define JZ_SIZE 2
 #define JNZ_SIZE 2
 #define JL_SIZE 2
@@ -64,19 +106,38 @@ std::string undefinedLabel(char* label);
 #define JG_SIZE 2
 #define JGE_SIZE 2
 #define JMP_SIZE 2
-#define DIV_SIZE 2
 #define MOD_SIZE 2
 #define PUSH_SIZE 1
 #define POP_SIZE 1
 #define INC_SIZE 1
 #define DEC_SIZE 1
+#define SHL_SIZE 2
+#define SHR_SIZE 2
+#define INT_SIZE 2
+#define ANDA_SIZE 2
+#define ANDI_SIZE 2
+#define ANDR_SIZE 2
+#define ORA_SIZE 2
+#define ORI_SIZE 2
+#define ORR_SIZE 2
+#define XORA_SIZE 2
+#define XORI_SIZE 2
+#define XORR_SIZE 2
+#define CMPA_SIZE 2
+#define CMPI_SIZE 2
+#define CMPR_SIZE 2
+#define CALL_SIZE 2
 
 // List of mnemonics
-const char* mnems[] = {"stop", "load", "store", "add", "sub", "jz", "jnz", "jl", 
-"jle", "jg", "jge", "jmp", "div", "mod", "push", "pop", "inc", "dec"};
+const char* mnems[] = {"stop", "loada", "loadi", "loadr", "storea", "storer", "adda", "addi", "addr", 
+"suba", "subi", "subr", "mula", "muli", "mulr", "diva", "divi", "divr",
+"jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "mod", "push", "pop", "inc", "dec",
+"shl", "shr", "int", "anda", "andi", "andr", "ora", "ori", "orr", "xora", "xori", "xorr",
+"cmpa", "cmpi", "cmpr", "call"};
+
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
-const char* jumps[] = {"jz", "jnz", "jl", "jle", "jg", "jge", "jmp"};
+const char* jumps[] = {"jz", "jnz", "jl", "jle", "jg", "jge", "jmp, call"};
 int jmplen = sizeof(jumps)/sizeof(jumps[0]);
 
 // List of directives
@@ -343,14 +404,40 @@ int getOpcode(char* mnem)
 {
     if(strcmp(mnem, "stop") == 0)
         return STOP_OPC;
-    if(strcmp(mnem, "load") == 0)
-        return LOAD_OPC;
-    if(strcmp(mnem, "store") == 0)
-        return STORE_OPC;
-    if(strcmp(mnem, "add") == 0)
-        return ADD_OPC;
-    if(strcmp(mnem, "sub") == 0)
-        return SUB_OPC;
+    if(strcmp(mnem, "loada") == 0)
+        return LOADA_OPC;
+    if(strcmp(mnem, "loadi") == 0)
+        return LOADI_OPC;
+    if(strcmp(mnem, "loadr") == 0)
+        return LOADR_OPC;
+    if(strcmp(mnem, "storea") == 0)
+        return STOREA_OPC;
+    if(strcmp(mnem, "storer") == 0)
+        return STORER_OPC;
+    if(strcmp(mnem, "adda") == 0)
+        return ADDA_OPC;
+    if(strcmp(mnem, "addi") == 0)
+        return ADDI_OPC;
+    if(strcmp(mnem, "addr") == 0)
+        return ADDR_OPC;
+    if(strcmp(mnem, "suba") == 0)
+        return SUBA_OPC;
+    if(strcmp(mnem, "subi") == 0)
+        return SUBI_OPC;
+    if(strcmp(mnem, "subr") == 0)
+        return SUBR_OPC;
+    if(strcmp(mnem, "mula") == 0)
+        return MULA_OPC;
+    if(strcmp(mnem, "muli") == 0)
+        return MULI_OPC;
+    if(strcmp(mnem, "mulr") == 0)
+        return MULR_OPC;
+    if(strcmp(mnem, "diva") == 0)
+        return DIVA_OPC;
+    if(strcmp(mnem, "divi") == 0)
+        return DIVI_OPC;
+    if(strcmp(mnem, "divr") == 0)
+        return DIVR_OPC;
     if(strcmp(mnem, "jz") == 0)
         return JZ_OPC;
     if(strcmp(mnem, "jnz") == 0)
@@ -365,8 +452,6 @@ int getOpcode(char* mnem)
         return JGE_OPC;
     if(strcmp(mnem, "jmp") == 0)
         return JMP_OPC;
-    if(strcmp(mnem, "div") == 0)
-        return DIV_OPC;
     if(strcmp(mnem, "mod") == 0)
         return MOD_OPC;
     if(strcmp(mnem, "push") == 0)
@@ -377,21 +462,79 @@ int getOpcode(char* mnem)
         return INC_OPC;
     if(strcmp(mnem, "dec") == 0)
         return DEC_OPC;
+    if(strcmp(mnem, "shr") == 0)
+        return SHR_OPC;
+    if(strcmp(mnem, "shl") == 0)
+        return SHL_OPC;
+    if(strcmp(mnem, "int") == 0)
+        return INT_OPC;
+    if(strcmp(mnem, "anda") == 0)
+        return ANDA_OPC;
+    if(strcmp(mnem, "andi") == 0)
+        return ANDI_OPC;
+    if(strcmp(mnem, "andr") == 0)
+        return ANDR_OPC;
+    if(strcmp(mnem, "ora") == 0)
+        return ORA_OPC;
+    if(strcmp(mnem, "ori") == 0)
+        return ORI_OPC;
+    if(strcmp(mnem, "orr") == 0)
+        return ORR_OPC;
+    if(strcmp(mnem, "xora") == 0)
+        return XORA_OPC;
+    if(strcmp(mnem, "xori") == 0)
+        return XORI_OPC;
+    if(strcmp(mnem, "xorr") == 0)
+        return XORR_OPC;
+    if(strcmp(mnem, "cmpa") == 0)
+        return CMPA_OPC;
+    if(strcmp(mnem, "cmpi") == 0)
+        return CMPA_OPC;
+    if(strcmp(mnem, "cmpr") == 0)
+        return CMPR_OPC;
+    if(strcmp(mnem, "call") == 0)
+        return CALL_OPC;
     return 999;
 }
 
 int getOpSize(char* mnem)
 {
-    if(strcmp(mnem, "stop") == 0)
+       if(strcmp(mnem, "stop") == 0)
         return STOP_SIZE;
-    if(strcmp(mnem, "load") == 0)
-        return LOAD_SIZE;
-    if(strcmp(mnem, "store") == 0)
-        return STORE_SIZE;
-    if(strcmp(mnem, "add") == 0)
-        return ADD_SIZE;
-    if(strcmp(mnem, "sub") == 0)
-        return SUB_SIZE;
+    if(strcmp(mnem, "loada") == 0)
+        return LOADA_SIZE;
+    if(strcmp(mnem, "loadi") == 0)
+        return LOADI_SIZE;
+    if(strcmp(mnem, "loadr") == 0)
+        return LOADR_SIZE;
+    if(strcmp(mnem, "storea") == 0)
+        return STOREA_SIZE;
+    if(strcmp(mnem, "storer") == 0)
+        return STORER_SIZE;
+    if(strcmp(mnem, "adda") == 0)
+        return ADDA_SIZE;
+    if(strcmp(mnem, "addi") == 0)
+        return ADDI_SIZE;
+    if(strcmp(mnem, "addr") == 0)
+        return ADDR_SIZE;
+    if(strcmp(mnem, "suba") == 0)
+        return SUBA_SIZE;
+    if(strcmp(mnem, "subi") == 0)
+        return SUBI_SIZE;
+    if(strcmp(mnem, "subr") == 0)
+        return SUBR_SIZE;
+    if(strcmp(mnem, "mula") == 0)
+        return MULA_SIZE;
+    if(strcmp(mnem, "muli") == 0)
+        return MULI_SIZE;
+    if(strcmp(mnem, "mulr") == 0)
+        return MULR_SIZE;
+    if(strcmp(mnem, "diva") == 0)
+        return DIVA_SIZE;
+    if(strcmp(mnem, "divi") == 0)
+        return DIVI_SIZE;
+    if(strcmp(mnem, "divr") == 0)
+        return DIVR_SIZE;
     if(strcmp(mnem, "jz") == 0)
         return JZ_SIZE;
     if(strcmp(mnem, "jnz") == 0)
@@ -406,8 +549,6 @@ int getOpSize(char* mnem)
         return JGE_SIZE;
     if(strcmp(mnem, "jmp") == 0)
         return JMP_SIZE;
-    if(strcmp(mnem, "div") == 0)
-        return DIV_SIZE;
     if(strcmp(mnem, "mod") == 0)
         return MOD_SIZE;
     if(strcmp(mnem, "push") == 0)
@@ -418,5 +559,37 @@ int getOpSize(char* mnem)
         return INC_SIZE;
     if(strcmp(mnem, "dec") == 0)
         return DEC_SIZE;
+    if(strcmp(mnem, "shr") == 0)
+        return SHR_SIZE;
+    if(strcmp(mnem, "shl") == 0)
+        return SHL_SIZE;
+    if(strcmp(mnem, "int") == 0)
+        return INT_SIZE;
+    if(strcmp(mnem, "anda") == 0)
+        return ANDA_SIZE;
+    if(strcmp(mnem, "andi") == 0)
+        return ANDI_SIZE;
+    if(strcmp(mnem, "andr") == 0)
+        return ANDR_SIZE;
+    if(strcmp(mnem, "ora") == 0)
+        return ORA_SIZE;
+    if(strcmp(mnem, "ori") == 0)
+        return ORI_SIZE;
+    if(strcmp(mnem, "orr") == 0)
+        return ORR_SIZE;
+    if(strcmp(mnem, "xora") == 0)
+        return XORA_SIZE;
+    if(strcmp(mnem, "xori") == 0)
+        return XORI_SIZE;
+    if(strcmp(mnem, "xorr") == 0)
+        return XORR_SIZE;
+    if(strcmp(mnem, "cmpa") == 0)
+        return CMPA_SIZE;
+    if(strcmp(mnem, "cmpi") == 0)
+        return CMPA_SIZE;
+    if(strcmp(mnem, "cmpr") == 0)
+        return CMPR_SIZE;
+    if(strcmp(mnem, "call") == 0)
+        return CALL_SIZE;
     return 999;
 }

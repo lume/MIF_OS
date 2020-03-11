@@ -14,17 +14,31 @@
 enum
 {
     sf = 1 << 0,
-    zf = 1 << 1
+    zf = 1 << 1,
+    lf = 1 << 2
 };
 
 // Instruction definition
 enum
 {
     STOP = 0,
-    LOAD,
-    STORE,
-    ADD,
-    SUB,
+    LOADA,
+    LOADI,
+    LOADR,
+    STOREA,
+    STORER,
+    ADDA,
+    ADDI,
+    ADDR,
+    SUBA,
+    SUBI,
+    SUBR,
+    MULA,
+    MULI,
+    MULR,
+    DIVA,
+    DIVI,
+    DIVR,
     JZ,
     JNZ,
     JL,
@@ -32,12 +46,27 @@ enum
     JG,
     JGE,
     JMP,
-    DIV,
     MOD,
     PUSH,
     POP,
     INC,
-    DEC
+    DEC,
+    SHL,
+    SHR,
+    INT,
+    ANDA,
+    ANDI,
+    ANDR,
+    ORA,
+    ORI,
+    ORR,
+    XORA,
+    XORI,
+    XORR,
+    CMPA,
+    CMPI,
+    CMPR,
+    CALL
 };
 
 void Cpu::OP_STOP()
@@ -45,7 +74,7 @@ void Cpu::OP_STOP()
     exit(0);
 }
 
-void Cpu::OP_LOAD()
+void Cpu::OP_LOADA()
 {
     pc++;
     addr = RAM[pc];
@@ -53,7 +82,27 @@ void Cpu::OP_LOAD()
     pc++;
 }
 
-void Cpu::OP_STORE()
+void Cpu::OP_LOADI()
+{
+    pc++;
+    acc = RAM[pc];
+    pc++;
+}
+
+void Cpu::OP_LOADR()
+{
+    pc++;
+    char c = RAM[pc];
+    
+    if(c == 'x')
+        acc = xReg;
+    else if(c == 'c')
+        acc = cReg;
+   
+    pc++;
+}
+
+void Cpu::OP_STOREA()
 {
     pc++;
     addr = RAM[pc];
@@ -61,10 +110,34 @@ void Cpu::OP_STORE()
     pc++;
 }
 
-void Cpu::OP_ADD()
+void Cpu::OP_STORER()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg = acc;
+    else if(c == 'c')
+        cReg = acc;
+
+    pc++;
+}
+
+void Cpu::OP_ADDA()
 {
     pc++;
     addr = RAM[pc];
+    acc += RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ADDI()
+{
+    pc++;
     acc += RAM[pc];
     if(acc < 0)
         fs |= sf;
@@ -73,11 +146,139 @@ void Cpu::OP_ADD()
     pc++;
 }
 
-void Cpu::OP_SUB()
+void Cpu::OP_ADDR()
+{
+    pc++;  
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc += xReg;
+    else if(c == 'c')
+        acc += cReg;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_SUBA()
 {
     pc++;
     addr = RAM[pc];
     acc -= RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_SUBI()
+{
+    pc++;
+    acc += RAM[pc];
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_SUBR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc -= xReg;
+    else if(c == 'c')
+        acc -= cReg;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_MULA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc *= RAM[addr];
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_MULI()
+{
+    pc++;
+    acc *= RAM[pc];
+    
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_MULR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc *= xReg;
+    else if(c == 'c')
+        acc *= cReg;
+    
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_DIVA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc / RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_DIVI()
+{
+    pc++;
+    acc = acc / RAM[pc];
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_DIVR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        acc /= xReg;
+    else if(c == 'c')
+        acc /= cReg;
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
@@ -90,7 +291,7 @@ void Cpu::OP_JZ()
     pc++;
     if(zf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -105,7 +306,7 @@ void Cpu::OP_JNZ()
     pc++;
     if(!zf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -120,7 +321,7 @@ void Cpu::OP_JL()
     pc++;
     if(sf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -135,7 +336,7 @@ void Cpu::OP_JLE()
     pc++;
     if(sf || zf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -150,7 +351,7 @@ void Cpu::OP_JG()
     pc++;
     if(!sf)
     {
-        int offset = RAM[pc];
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -165,7 +366,8 @@ void Cpu::OP_JGE()
     pc++;
     if(!sf || zf)
     {
-        int offset = RAM[pc];
+        //TODO: Add a check for overflow.
+        uint8_t offset = RAM[pc];
         pc++;
         pc += offset;
     }
@@ -178,21 +380,9 @@ void Cpu::OP_JGE()
 void Cpu::OP_JMP()
 {
     pc++;
-    int offset = RAM[pc];
+    uint8_t offset = RAM[pc];
     pc++;
     pc += offset;
-}
-
-void Cpu::OP_DIV()
-{
-    pc++;
-    addr = RAM[pc];
-    acc = acc / RAM[addr];
-    if(acc < 0)
-        fs |= sf;
-    if(acc == 0)
-        fs |= zf;
-    pc++;
 }
 
 void Cpu::OP_MOD()
@@ -243,6 +433,197 @@ void Cpu::OP_DEC()
         fs |= zf;
 }
 
+void Cpu::OP_INT()
+{
+   //TODO: implement interrupts
+}
+
+void Cpu::OP_ANDA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc & RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ANDI()
+{
+    pc++;
+    acc = acc & RAM[pc];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ANDR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg &= acc;
+    else if(c == 'c')
+        cReg &= acc;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ORA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc | RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ORI()
+{
+    pc++;
+    acc = acc | RAM[pc];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_ORR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg |= acc;
+    else if(c == 'c')
+        cReg |= acc;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_XORA()
+{
+    pc++;
+    addr = RAM[pc];
+    acc = acc ^ RAM[addr];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_XORI()
+{
+    pc++;
+    acc = acc ^ RAM[pc];
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_XORR()
+{
+    pc++;
+    char c = RAM[pc];
+
+    if(c == 'x')
+        xReg ^= acc;
+    else if(c == 'c')
+        cReg ^= acc;
+
+    if(acc < 0)
+        fs |= sf;
+    if(acc == 0)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CMPA()
+{
+    pc++;
+    addr = RAM[pc];
+    uint16_t val = RAM[addr];
+    
+    if(acc < val)
+        fs |= lf;
+    if(acc == val)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CMPI()
+{
+    pc++;
+    uint16_t val = RAM[pc];
+    
+    if(acc < val)
+        fs |= lf;
+    if(acc == val)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CMPR()
+{
+    pc++;
+    char c = RAM[pc];
+    uint16_t val;
+    
+    if(c == 'x')
+        val = xReg;
+    else if(c == 'c')
+        val = cReg;
+
+    if(acc < val)
+        fs |= lf;
+    if(acc == val)
+        fs |= zf;
+    pc++;
+}
+
+void Cpu::OP_CALL()
+{
+    pc++;
+    //TODO: add overflow check
+    uint16_t offset = RAM[pc];
+    pc++;
+    pc += offset;
+}
+
+void Cpu::OP_SHR()
+{
+    pc++;
+    acc >> RAM[pc];
+    pc++;
+}
+
+void Cpu::OP_SHL()
+{
+    pc++;
+    acc << RAM[pc];
+    pc++;
+}
+
 void Cpu::UNDEFINED()
 {
     printf("UNDEFINED INSTRUCTION CODE");
@@ -264,17 +645,56 @@ void Cpu::Decode()
     case(STOP):
         OP_STOP();
         break;
-    case(LOAD):
-        OP_LOAD();
+    case(LOADA):
+        OP_LOADA();
         break;
-    case(STORE):
-        OP_STORE();
+    case(LOADI):
+        OP_LOADI();
         break;
-    case(ADD):
-        OP_ADD();
+    case(LOADR):
+        OP_LOADR();
         break;
-    case(SUB):
-        OP_SUB();
+    case(STOREA):
+        OP_STOREA();
+        break;
+    case(STORER):
+        OP_STORER();
+        break;
+    case(ADDA):
+        OP_ADDA();
+        break;
+    case(ADDI):
+        OP_ADDI();
+        break;
+    case(ADDR):
+        OP_ADDR();
+        break;
+    case(SUBA):
+        OP_SUBA();
+        break;
+    case(SUBI):
+        OP_SUBI();
+        break;
+    case(SUBR):
+        OP_SUBR();
+        break;
+    case(MULA):
+        OP_MULA();
+        break;
+    case(MULI):
+        OP_MULI();
+        break;
+    case(MULR):
+        OP_MULR();
+        break;
+    case(DIVA):
+        OP_DIVA();
+        break;
+    case(DIVI):
+        OP_DIVI();
+        break;
+    case(DIVR):
+        OP_DIVR();
         break;
     case(JZ):
         OP_JZ();
@@ -297,9 +717,6 @@ void Cpu::Decode()
     case(JMP):
         OP_JMP();
         break;
-    case(DIV):
-        OP_DIV();
-        break;
     case(MOD):
         OP_MOD();
         break;
@@ -314,6 +731,54 @@ void Cpu::Decode()
         break;
     case(DEC):
         OP_DEC();
+        break;
+    case(SHL):
+        OP_SHL();
+        break;
+    case(SHR):
+        OP_SHR();
+        break;
+    case(INT):
+        OP_INT();
+        break;
+    case(ANDA):
+        OP_ANDA();
+        break;
+    case(ANDI):
+        OP_ANDI();
+        break;
+    case(ANDR):
+        OP_ANDR();
+        break;
+    case(ORA):
+        OP_ORA();
+        break;
+    case(ORI):
+        OP_ORI();
+        break;
+    case(ORR):
+        OP_ORR();
+        break;
+    case(XORA):
+        OP_XORA();
+        break;
+    case(XORI):
+        OP_XORI();
+        break;
+    case(XORR):
+        OP_XORR();
+        break;
+    case(CMPA):
+        OP_CMPA();
+        break;
+    case(CMPI):
+        OP_CMPI();
+        break;
+    case(CMPR):
+        OP_CMPR();
+        break;
+    case(CALL):
+        OP_CALL();
         break;
     default:
         UNDEFINED();
