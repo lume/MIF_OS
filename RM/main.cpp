@@ -6,14 +6,16 @@
 int main(int argc, char** argv)
 {   
     if(argc == 1)
-        printf("no file provided %d", argc);
-    
+    {
+        printf("no file provided");
+        exit(1);
+    }
 
     printf("Loading the program to the RAM\n");
 
     Cpu cpu = Cpu();
 
-    cpu.LoadProgram("out.txt");
+    cpu.LoadProgram(argv[1]);
 
     printf("RAM before execution:\n");
     cpu.ShowRam();
