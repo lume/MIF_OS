@@ -1,8 +1,7 @@
 #pragma once 
 #include <string>
 #include <array>
-
-#define RAM_SIZE 48
+#include "memcontrol.h"
 
 class Cpu
 {
@@ -13,8 +12,8 @@ class Cpu
         void ExecuteProgram(); // Execute the loaded program
 
     private:
-        std::array<int, RAM_SIZE> RAM = {0};
-
+        Memcontrol memcontroller = Memcontrol();
+        
         // Register definition
         uint16_t pc = 0x0;   // program counter
         uint16_t addr = 0x0; // internal addr register
@@ -24,6 +23,8 @@ class Cpu
         uint16_t fs = 0x0; // flags
         uint16_t xReg = 0x0; // x register
         uint16_t cReg = 0x0; // c register
+
+        //TODO: Add TLB
 
         void Fetch();
         void Decode();

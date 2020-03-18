@@ -10,6 +10,10 @@
 #include <string>
 #include <string.h>
 
+#define RAM memcontroller.RAM
+
+//TODO: encapsulate RAM read/write operations 
+
 // Flag definition
 enum
 {
