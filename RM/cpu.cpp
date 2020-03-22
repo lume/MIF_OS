@@ -10,6 +10,10 @@
 #include <string>
 #include <string.h>
 
+#define RAM memcontroller.RAM
+
+//TODO: encapsulate RAM read/write operations 
+
 // Flag definition
 enum
 {
@@ -822,7 +826,7 @@ void Cpu::LoadProgram(std::string filename)
         {
             machineCode.push_back(atoi(ch));
             ch = strtok(NULL, " ");
-            printf("%c", ch);
+            //printf("%c", ch);
         }
     }
     else
