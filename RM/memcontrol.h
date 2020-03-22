@@ -24,6 +24,7 @@ struct Memory
 {
     //memory protection is planned to be added at the OS level
     std::vector<int> usedPages;
+    std::vector<int> addresses;
 };
 
 struct Segment
@@ -50,11 +51,12 @@ class Memcontrol
     uint16_t ReadRAM(int address);
 
     // Segment control operations
-    Segment InitSegment();
+    Segment InitSegment(int direction);
     void WriteSegment(Segment segment, int address, int value);
     uint16_t ReadSegment(Segment segment, int address);
 
     private:
         void MoveToSwap(int pageNumber); // TODO: this function needs IOControl
         int FindLeastAccessedPage();
+        std::vector<int> GetAddressList(std::vector<int> pages);
 };

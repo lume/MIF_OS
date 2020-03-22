@@ -840,11 +840,9 @@ Program Cpu::LoadProgram(std::string filename)
     }
     
     // Machine code is loaded to the list, now we load this code into RAM
-    dataSegment = {memcontroller.AllocateMemory(1<<12),0};
-    codeSegment = {memcontroller.AllocateMemory(1<<12),0};
-    stackSegment = {memcontroller.AllocateMemory(1<<12),1};
-
-    
+    dataSegment = {memcontroller.AllocateMemory(1<<12), 0, 0, 0};
+    codeSegment = {memcontroller.AllocateMemory(1<<12), 0, 0, 0};
+    stackSegment = {memcontroller.AllocateMemory(1<<12), 0, 0, 1 };
 
     return {dataSegment, codeSegment, stackSegment};
 }

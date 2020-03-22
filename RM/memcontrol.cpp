@@ -32,7 +32,7 @@ Memory Memcontrol::AllocateMemory(uint16_t size)
     if(memPageNumbers.size() != pageCount)
         throw new std::runtime_error("Out of memory :("); // If we can't find memory to swap too, it means we are out of memory
     else
-        return {memPageNumbers};
+        return {memPageNumbers, GetAddressList(memPageNumbers)};
 }
 
 void Memcontrol::FreeMemory(Memory mem)
@@ -85,3 +85,33 @@ void Memcontrol::WriteSegment(Segment segment, int address, int value)
 }
 
 uint16_t Memcontrol::ReadSegment(Segment segment, int address){}
+
+Segment Memcontrol::InitSegment(int direction)
+{
+    Segment segment;
+    int pageNumber;
+    
+    segment.direction = direction;
+    segment.memory = AllocateMemory(1<<12);
+    pageNumber = segment.memory.usedPages[0];
+    segment.writePointer = (pageNumber << 9) & 0b11111111100000000000;
+    segment.readPointer = (pageNumber << 9) & 0b11111111100000000000;
+    return segment;
+}
+
+std::vector<int> Memcontrol::GetAddressList(std::vector<int> pages)
+{
+    std::vector<int> addressList;
+    int z = 0b111111111111;
+
+    for(auto &p : pages){
+        int k = p << 12;
+        for(int i = 0; i < z; i++){
+            addressList.push_back(k + i);
+        }
+    }
+
+    int x = addressList.size();
+
+    return addressList;
+}

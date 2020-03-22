@@ -18,12 +18,7 @@ int main(int argc, char** argv)
 
     Program program = cpu.LoadProgram(argv[1]);
 
-    printf("RAM before execution:\n");
-    cpu.ShowRam();
-    printf("Executing program:\n");
     cpu.ExecuteProgram(program);
-    printf("RAM after execution:\n");
-    cpu.ShowRam();
-
+ 
     return 0;
 }
