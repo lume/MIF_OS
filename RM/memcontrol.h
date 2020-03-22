@@ -26,6 +26,14 @@ struct Memory
     std::vector<int> usedPages;
 };
 
+struct Segment
+{
+    Memory memory;
+    int readPointer;  // Pointer to the piece of segment where last read occured
+    int writePointer; // Pointer to the piece of segment where last write occured
+    char direction;   // if is set to 1, memory write/read is backward (stack)
+};
+
 class Memcontrol
 {
     public: 
@@ -40,6 +48,11 @@ class Memcontrol
     // Write and Read operations translate virtual address into physical
     void WriteRAM(int address, int value);
     uint16_t ReadRAM(int address);
+
+    // Segment control operations
+    Segment InitSegment();
+    void WriteSegment(Segment segment, int address, int value);
+    uint16_t ReadSegment(Segment segment, int address);
 
     private:
         void MoveToSwap(int pageNumber); // TODO: this function needs IOControl

@@ -807,13 +807,17 @@ void Cpu::ShowRam()
         printf("sign flag is set!\n");
 }
 
-void Cpu::LoadProgram(std::string filename)
+Program Cpu::LoadProgram(std::string filename)
 { 
     //TODO: Rework program loading so it handles virtual memory correctly
     //For now we do not allow to have programs bigger than our RAM
     std::vector<int> machineCode;
     std::stringstream tempStream;
     std::ifstream ifile(filename);
+
+    Segment codeSegment;
+    Segment stackSegment;
+    Segment dataSegment;
 
     if(ifile)
     {
@@ -835,33 +839,49 @@ void Cpu::LoadProgram(std::string filename)
         exit(1);
     }
     
+    // Machine code is loaded to the list, now we load this code into RAM
+    dataSegment = {memcontroller.AllocateMemory(1<<12),0};
+    codeSegment = {memcontroller.AllocateMemory(1<<12),0};
+    stackSegment = {memcontroller.AllocateMemory(1<<12),1};
 
-    printf("\n");
+    
 
-    for(int i = 0; i < machineCode.size(); i++)
-    {
-        printf("%d", machineCode[i]);
-    }
-
-    if(machineCode.size() > RAM_SIZE)
-    {
-        printf("Not enough RAM space for this program!");
-        exit(1);
-    }
-    else
-    {
-        for(int i = 0; i < machineCode.size(); i++)
-        {
-            RAM[i] = machineCode[i];
-        }
-    }
+    return {dataSegment, codeSegment, stackSegment};
 }
 
-void Cpu::ExecuteProgram()
+void Cpu::ExecuteProgram(Program program)
 {
+    SetFromSnapshot(program.cpuSnapshot);
     while(RAM[pc] != 0)
     {
         Fetch();
         Decode();
     }
+    program.cpuSnapshot = SaveToSnapshot();
+}
+
+CpuSnapshot Cpu::SaveToSnapshot()
+{
+    CpuSnapshot snap;
+    snap.acc = acc;
+    snap.addr = addr;
+    snap.cReg = cReg;
+    snap.fs = fs;
+    snap.ir = ir;
+    snap.pc = pc;
+    snap.sp = sp;
+    snap.xReg = xReg;
+    return snap;
+}
+
+void Cpu::SetFromSnapshot(CpuSnapshot snapshot)
+{
+    acc = snapshot.acc;
+    addr = snapshot.addr;
+    cReg = snapshot.cReg;
+    fs = snapshot.fs;
+    sp = snapshot.sp;
+    ir = snapshot.ir;
+    pc = snapshot.pc;
+    xReg = snapshot.xReg;
 }

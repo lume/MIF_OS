@@ -2,6 +2,7 @@
 #include "cpu.h"
 
 //TODO: Write a make file
+//TODO: Implement memory segmentation
 
 int main(int argc, char** argv)
 {   
@@ -15,12 +16,12 @@ int main(int argc, char** argv)
 
     Cpu cpu = Cpu();
 
-    cpu.LoadProgram(argv[1]);
+    Program program = cpu.LoadProgram(argv[1]);
 
     printf("RAM before execution:\n");
     cpu.ShowRam();
     printf("Executing program:\n");
-    cpu.ExecuteProgram();
+    cpu.ExecuteProgram(program);
     printf("RAM after execution:\n");
     cpu.ShowRam();
 

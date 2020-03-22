@@ -6,13 +6,13 @@ Memory Memcontrol::AllocateMemory(uint16_t size)
     int pageCount = 0;
 
     if(size % 4 == 0)
-        pageCount = size/4;    
+        pageCount = size/4096;    
     else
-        pageCount = size/4 + 1;
+        pageCount = size/4096 + 1;
 
     for(int i = 0; i < PAGETABLE_SIZE; i++)
     {
-        if(memPageNumbers.size == pageCount)
+        if(memPageNumbers.size() == pageCount)
             continue;
         else if(!pageTable[i].used && pageTable[i].frame < 256)
         {
@@ -21,7 +21,7 @@ Memory Memcontrol::AllocateMemory(uint16_t size)
         }
     }
 
-    for(int i = 0; i < pageCount - memPageNumbers.size; i++)
+    for(int i = 0; i < pageCount - memPageNumbers.size(); i++)
     {
         int leastAccessed = FindLeastAccessedPage();
         MoveToSwap(leastAccessed);
@@ -29,7 +29,7 @@ Memory Memcontrol::AllocateMemory(uint16_t size)
         pageTable[leastAccessed].used = true;
     }
 
-    if(memPageNumbers.size != pageCount)
+    if(memPageNumbers.size() != pageCount)
         throw new std::runtime_error("Out of memory :("); // If we can't find memory to swap too, it means we are out of memory
     else
         return {memPageNumbers};
@@ -56,6 +56,7 @@ int Memcontrol::FindLeastAccessedPage()
 
 void Memcontrol::WriteRAM(int address, int value)
 {
+    //TODO: Add memory safety (check if address is in bounds of the page)
     int pageNumber = address & 0b11111111100000000000;
     int offset = address &0b00000000011111111111;
     int frameNumber = pageTable[pageNumber].frame;
@@ -66,6 +67,7 @@ void Memcontrol::WriteRAM(int address, int value)
 
 uint16_t Memcontrol::ReadRAM(int address)
 {
+    //TODO: Add memory safety (check if address is in bounds of the page)
     int pageNumber = address & 0b11111111100000000000;
     int offset = address &0b00000000011111111111;
     int frameNumber = pageTable[pageNumber].frame;
@@ -73,3 +75,13 @@ uint16_t Memcontrol::ReadRAM(int address)
 
     return RAM[physAddress];
 }
+
+void Memcontrol::MoveToSwap(int pageNumber)
+{}
+
+void Memcontrol::WriteSegment(Segment segment, int address, int value)
+{
+
+}
+
+uint16_t Memcontrol::ReadSegment(Segment segment, int address){}

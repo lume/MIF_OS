@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}\\RM\\test.exe",
             "args": [
-                "${workspaceFolder}\\RM\\01.asm"
+                "${workspaceFolder}\\RM\\out.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

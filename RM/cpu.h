@@ -3,13 +3,37 @@
 #include <array>
 #include "memcontrol.h"
 
+//TODO: implement data segment operations
+
+struct CpuSnapshot
+{
+    uint16_t pc = 0x0;   // program counter
+    uint16_t addr = 0x0; // internal addr register
+    uint16_t acc = 0x0;   // accumulator
+    uint16_t ir = 0x0;   // instruction register
+    uint16_t sp = RAM_SIZE - 1; // stack pointer 
+    uint16_t fs = 0x0; // flags
+    uint16_t xReg = 0x0; // x register
+    uint16_t cReg = 0x0; // c register
+};
+
+struct Program
+{
+    Segment dataSegment;
+    Segment codeSegment;
+    Segment stackSegment;
+    CpuSnapshot cpuSnapshot;
+};
+
 class Cpu
 {
     public:
         Cpu(){}
         void ShowRam(); // Show the contents of the RAM
-        void LoadProgram(std::string filename);// Load the Program machine code to the memory
-        void ExecuteProgram(); // Execute the loaded program
+        Program LoadProgram(std::string filename);// Load the Program machine code to the memory
+        void ExecuteProgram(Program program); // Execute the loaded program
+        CpuSnapshot SaveToSnapshot();
+        void SetFromSnapshot(CpuSnapshot snapshot);
 
     private:
         Memcontrol memcontroller = Memcontrol();
