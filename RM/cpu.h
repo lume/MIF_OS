@@ -11,7 +11,7 @@ struct CpuSnapshot
     uint16_t addr = 0x0; // internal addr register
     uint16_t acc = 0x0;   // accumulator
     uint16_t ir = 0x0;   // instruction register
-    uint16_t sp = RAM_SIZE - 1; // stack pointer 
+    int sp = RAM_SIZE - 1; // stack pointer 
     uint16_t fs = 0x0; // flags
     uint16_t xReg = 0x0; // x register
     uint16_t cReg = 0x0; // c register
@@ -43,7 +43,7 @@ class Cpu
         uint16_t addr = 0x0; // internal addr register
         uint16_t acc = 0x0;   // accumulator
         uint16_t ir = 0x0;   // instruction register
-        uint16_t sp = RAM_SIZE - 1; // stack pointer 
+        int sp = RAM_SIZE - 1; // stack pointer 
         uint16_t fs = 0x0; // flags
         uint16_t xReg = 0x0; // x register
         uint16_t cReg = 0x0; // c register

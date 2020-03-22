@@ -4,8 +4,8 @@
 #include <vector>
 // memcontrol is responsible for access to RAM, paging. See this as the MMU
 
-#define RAM_SIZE 48
-#define VRAM_SIZE 96
+#define RAM_SIZE 1048576
+#define VRAM_SIZE 2097152
 #define PAGETABLE_SIZE 512 // 512 pages 4kb each 
 #define FRAMETABLE_SIZE 256 // 256 frames of physical memory
 
@@ -35,25 +35,27 @@ struct Segment
     char direction;   // if is set to 1, memory write/read is backward (stack)
 };
 
+inline std::array<uint16_t, RAM_SIZE> RAM = {0};
+inline std::array<uint16_t, VRAM_SIZE> VRAM = {0};
+inline std::array<Page, PAGETABLE_SIZE> pageTable;
+inline std::array<int, FRAMETABLE_SIZE> frameTable;
+
 class Memcontrol
 {
     public: 
-        std::array<uint16_t, RAM_SIZE> RAM = {0};
-        std::array<uint16_t, VRAM_SIZE> VRAM = {0};
-        std::array<Page, PAGETABLE_SIZE> pageTable;
-        std::array<int, FRAMETABLE_SIZE> frameTable;
+        Memcontrol();
 
-    Memory AllocateMemory(uint16_t size);
-    void FreeMemory(Memory mem);
+        Memory AllocateMemory(uint16_t size);
+        void FreeMemory(Memory mem);
 
-    // Write and Read operations translate virtual address into physical
-    void WriteRAM(int address, int value);
-    uint16_t ReadRAM(int address);
+        // Write and Read operations translate virtual address into physical
+        void WriteRAM(int address, int value);
+        uint16_t ReadRAM(int address);
 
-    // Segment control operations
-    Segment InitSegment(int direction);
-    void WriteSegment(Segment segment, int address, int value);
-    uint16_t ReadSegment(Segment segment, int address);
+        // Segment control operations
+        Segment InitSegment(int direction);
+        void WriteSegment(Segment segment, int address, int value);
+        uint16_t ReadSegment(Segment segment, int address);
 
     private:
         void MoveToSwap(int pageNumber); // TODO: this function needs IOControl

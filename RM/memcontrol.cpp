@@ -1,4 +1,5 @@
 #include "memcontrol.h"
+#include <algorithm>
 
 Memory Memcontrol::AllocateMemory(uint16_t size)
 {
@@ -57,10 +58,13 @@ int Memcontrol::FindLeastAccessedPage()
 void Memcontrol::WriteRAM(int address, int value)
 {
     //TODO: Add memory safety (check if address is in bounds of the page)
-    int pageNumber = address & 0b11111111100000000000;
-    int offset = address &0b00000000011111111111;
+    int pageNumber = address & 0b111111111100000000000;
+    pageNumber = pageNumber >> 12;
+    int offset = address &0b000000000011111111111;
     int frameNumber = pageTable[pageNumber].frame;
-    int physAddress = frameNumber + offset;
+    int physAddress = frameNumber * 4096 + offset;
+
+    pageTable[pageNumber].timesAccessed++;
 
     RAM[physAddress] = value;
 }
@@ -68,10 +72,13 @@ void Memcontrol::WriteRAM(int address, int value)
 uint16_t Memcontrol::ReadRAM(int address)
 {
     //TODO: Add memory safety (check if address is in bounds of the page)
-    int pageNumber = address & 0b11111111100000000000;
-    int offset = address &0b00000000011111111111;
+    int pageNumber = address & 0b111111111100000000000;
+    pageNumber = pageNumber >> 12;
+    int offset = address & 0b000000000011111111111;
     int frameNumber = pageTable[pageNumber].frame;
-    int physAddress = frameNumber + offset;
+    int physAddress = frameNumber * 4096 + offset;
+
+    pageTable[pageNumber].timesAccessed++;
 
     return RAM[physAddress];
 }
@@ -81,7 +88,13 @@ void Memcontrol::MoveToSwap(int pageNumber)
 
 void Memcontrol::WriteSegment(Segment segment, int address, int value)
 {
-
+    if(std::find(segment.memory.addresses.begin(), segment.memory.addresses.end(), address) != segment.memory.addresses.end())
+    {
+        WriteRAM(address, value);
+    }
+    else{
+        throw std::runtime_error("Trying to write into forbidden memory");
+    }
 }
 
 uint16_t Memcontrol::ReadSegment(Segment segment, int address){}
@@ -94,8 +107,8 @@ Segment Memcontrol::InitSegment(int direction)
     segment.direction = direction;
     segment.memory = AllocateMemory(1<<12);
     pageNumber = segment.memory.usedPages[0];
-    segment.writePointer = (pageNumber << 9) & 0b11111111100000000000;
-    segment.readPointer = (pageNumber << 9) & 0b11111111100000000000;
+    segment.writePointer = (pageNumber << 12) & 0b11111111100000000000;
+    segment.readPointer = (pageNumber << 12) & 0b11111111100000000000;
     return segment;
 }
 
@@ -104,9 +117,11 @@ std::vector<int> Memcontrol::GetAddressList(std::vector<int> pages)
     std::vector<int> addressList;
     int z = 0b111111111111;
 
-    for(auto &p : pages){
+    for(auto &p : pages)
+    {
         int k = p << 12;
-        for(int i = 0; i < z; i++){
+        for(int i = 0; i < z; i++)
+        {
             addressList.push_back(k + i);
         }
     }
@@ -114,4 +129,14 @@ std::vector<int> Memcontrol::GetAddressList(std::vector<int> pages)
     int x = addressList.size();
 
     return addressList;
+}
+
+Memcontrol::Memcontrol()
+{
+    for(int i = 0; i < PAGETABLE_SIZE; i++)
+    {
+        pageTable[i].frame = i;
+        pageTable[i].timesAccessed = 0;
+        pageTable[i].used = false;
+    }
 }

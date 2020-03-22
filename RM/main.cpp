@@ -17,8 +17,10 @@ int main(int argc, char** argv)
     Cpu cpu = Cpu();
 
     Program program = cpu.LoadProgram(argv[1]);
+    cpu.ShowRam();
 
     cpu.ExecuteProgram(program);
- 
+    
+
     return 0;
 }

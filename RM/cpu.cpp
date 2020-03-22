@@ -10,7 +10,7 @@
 #include <string>
 #include <string.h>
 
-#define RAM memcontroller.RAM
+//#define RAM memcontroller.RAM
 
 //TODO: encapsulate RAM read/write operations 
 
@@ -795,7 +795,7 @@ void Cpu::Decode()
 void Cpu::ShowRam()
 {
     printf("[");
-    for(int i = 0; i < RAM_SIZE; i++)
+    for(int i = 4096; i < 4196; i++)
     {
         printf("%d, ", RAM[i]);
     }
@@ -840,9 +840,14 @@ Program Cpu::LoadProgram(std::string filename)
     }
     
     // Machine code is loaded to the list, now we load this code into RAM
-    dataSegment = {memcontroller.AllocateMemory(1<<12), 0, 0, 0};
-    codeSegment = {memcontroller.AllocateMemory(1<<12), 0, 0, 0};
-    stackSegment = {memcontroller.AllocateMemory(1<<12), 0, 0, 1 };
+    dataSegment = memcontroller.InitSegment(0);
+    codeSegment = memcontroller.InitSegment(0);
+    stackSegment = memcontroller.InitSegment(1);
+
+    for(int i = 0; i < machineCode.size(); i++){
+        memcontroller.WriteSegment(codeSegment, codeSegment.writePointer, machineCode[i]);
+        codeSegment.writePointer++;
+    }
 
     return {dataSegment, codeSegment, stackSegment};
 }
