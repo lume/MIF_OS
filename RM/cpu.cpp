@@ -794,12 +794,21 @@ void Cpu::Decode()
 
 void Cpu::ShowRam()
 {
+    printf("CODE:\n");
     printf("[");
-    for(int i = 4096; i < 4196; i++)
+    for(int i = 4096; i < 4197; i++)
     {
         printf("%d, ", RAM[i]);
     }
-    printf("]");
+    printf("]\n");
+
+    printf("STEK:\n");
+    printf("[");
+    for(int i = 12187; i < 12288; i++)
+    {
+        printf("%d, ", RAM[i]);
+    }
+    printf("]\n");
 
     if(zf)
         printf("zero flag is set!\n");
@@ -849,7 +858,11 @@ Program Cpu::LoadProgram(std::string filename)
         codeSegment.writePointer++;
     }
 
-    return {dataSegment, codeSegment, stackSegment};
+    // Map system registers to segments
+    sp = stackSegment.readPointer+4095;
+    pc = codeSegment.readPointer;
+
+    return {dataSegment, codeSegment, stackSegment, SaveToSnapshot()};
 }
 
 void Cpu::ExecuteProgram(Program program)

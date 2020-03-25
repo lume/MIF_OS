@@ -1,2 +1,8 @@
-org 10
-   data 10
+loadi 1050
+push
+push
+push
+pop
+pop
+loadi 5555
+push

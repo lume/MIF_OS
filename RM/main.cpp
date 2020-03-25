@@ -20,6 +20,8 @@ int main(int argc, char** argv)
     cpu.ShowRam();
 
     cpu.ExecuteProgram(program);
+
+    cpu.ShowRam();
     
 
     return 0;
