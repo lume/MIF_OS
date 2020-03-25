@@ -79,6 +79,12 @@ std::string undefinedLabel(char* label);
 #define CMPI_OPC 41
 #define CMPR_OPC 42
 #define CALL_OPC 43
+#define VAR_OPC 44
+#define PTR_OPC 45
+#define LOADV_OPC 46
+#define LOADP_OPC 47
+#define STOREV_OPC 48
+#define STOREP_OPC 49
 
 // Instruction sizes
 #define STOP_SIZE 1
@@ -127,13 +133,19 @@ std::string undefinedLabel(char* label);
 #define CMPI_SIZE 2
 #define CMPR_SIZE 2
 #define CALL_SIZE 2
+#define VAR_SIZE 2
+#define PTR_SIZE 2
+#define LOADV_SIZE 2
+#define LOADP_SIZE 2
+#define STOREP_SIZE 2
+#define STOREV_SIZE 2
 
 // List of mnemonics
-const char* mnems[] = {"stop", "loada", "loadi", "loadr", "storea", "storer", "adda", "addi", "addr", 
+const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "storea", "storer", "storev", "storep", "adda", "addi", "addr", 
 "suba", "subi", "subr", "mula", "muli", "mulr", "diva", "divi", "divr",
 "jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "mod", "push", "pop", "inc", "dec",
 "shl", "shr", "int", "anda", "andi", "andr", "ora", "ori", "orr", "xora", "xori", "xorr",
-"cmpa", "cmpi", "cmpr", "call"};
+"cmpa", "cmpi", "cmpr", "call", "var", "ptr"};
 
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
@@ -304,7 +316,7 @@ void ParseMnemo(char* mnemo, char* line)
             return;
         }
     }
-
+    //
     // This is not a jump
     int opcode = getOpcode(mnemToken);
     code.insert(code.end(), opcode);
@@ -312,7 +324,13 @@ void ParseMnemo(char* mnemo, char* line)
     if(opsize > 1)
     {
         char* arg = strtok(NULL, delim);
-        code.insert(code.end(), atoi(arg));
+        int t = atoi(arg);
+        if(t == 0)
+        {
+            //since atoi means UB, we need to double check apparently :/
+            t = (int)arg[0];
+        }
+        code.insert(code.end(), t);
     }
     src_counter += opsize;
 
@@ -368,6 +386,7 @@ void compile_LABEL(char* line)
     }
 }
 
+//TODO: Make it same as Label, just store some value in address in data segment
 void compile_DATA(char* line)
 {
     char delim[] = " ";
@@ -494,6 +513,18 @@ int getOpcode(char* mnem)
         return CMPR_OPC;
     if(strcmp(mnem, "call") == 0)
         return CALL_OPC;
+    if(strcmp(mnem, "loadv") == 0)
+        return LOADV_OPC;
+    if(strcmp(mnem, "loadp") == 0)
+        return LOADP_OPC;
+    if(strcmp(mnem, "storev") == 0)
+        return STOREV_OPC;
+    if(strcmp(mnem, "storep") == 0)
+        return STOREP_OPC;
+    if(strcmp(mnem, "var") == 0)
+        return VAR_OPC;
+    if(strcmp(mnem, "ptr") == 0)
+        return PTR_OPC;
     return 999;
 }
 
@@ -591,5 +622,17 @@ int getOpSize(char* mnem)
         return CMPR_SIZE;
     if(strcmp(mnem, "call") == 0)
         return CALL_SIZE;
+    if(strcmp(mnem, "loadv") == 0)
+        return LOADV_SIZE;
+    if(strcmp(mnem, "loadp") == 0)
+        return LOADP_SIZE;
+    if(strcmp(mnem, "storev") == 0)
+        return STOREV_SIZE;
+    if(strcmp(mnem, "storep") == 0)
+        return STOREP_SIZE;
+    if(strcmp(mnem, "var") == 0)
+        return VAR_SIZE;
+    if(strcmp(mnem, "ptr") == 0)
+        return PTR_SIZE;
     return 999;
 }
