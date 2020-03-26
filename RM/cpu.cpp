@@ -70,7 +70,13 @@ enum
     CMPA,
     CMPI,
     CMPR,
-    CALL
+    CALL,
+    VAR,
+    PTR,
+    LOADV,
+    LOADP,
+    STOREP,
+    STOREV
 };
 
 void Cpu::OP_STOP()
@@ -631,19 +637,26 @@ void Cpu::OP_SHL()
 void Cpu::OP_VAR()
 {
     pc++;
-    int varAddr = activeProgram.codeSegment.writePointer;
+    int varAddr = activeProgram.dataSegment.writePointer;
+    int x = RAM[pc];
     RAM[varAddr] = RAM[pc];
-    pc++;
     RAM[varAddr+1] = RAM[pc];
     pc++;
+    activeProgram.dataSegment.writePointer += 2; 
 }
 
 void Cpu::OP_PTR()
-{}
+{
+    //TODO: Implement
+    pc++;
+    pc++;
+}
 
 void Cpu::OP_LOADP()
 {
-
+    //TODO: Implement
+    pc++;
+    pc++;
 }
 
 void Cpu::OP_LOADV()
@@ -663,7 +676,11 @@ void Cpu::OP_STOREV()
 }
 
 void Cpu::OP_STOREP()
-{}
+{
+    //TODO: Implement
+    pc++;
+    pc++;    
+}
 
 void Cpu::UNDEFINED()
 {
@@ -821,6 +838,24 @@ void Cpu::Decode()
     case(CALL):
         OP_CALL();
         break;
+    case(VAR):
+        OP_VAR();
+        break;
+    case(PTR):
+        OP_PTR();
+        break;
+    case(STOREV):
+        OP_STOREV();
+        break;
+    case(LOADV):
+        OP_LOADV();
+        break;
+    case(LOADP):
+        OP_LOADP();
+        break;
+    case(STOREP):
+        OP_STOREP();
+        break;
     default:
         UNDEFINED();
         break;
@@ -842,6 +877,14 @@ void Cpu::ShowRam()
     printf("STEK:\n");
     printf("[");
     for(int i = 12187; i < 12288; i++)
+    {
+        printf("%d, ", RAM[i]);
+    }
+    printf("]\n");
+
+    printf("DATA:\n");
+    printf("[");
+    for(int i = 0; i < 101; i++)
     {
         printf("%d, ", RAM[i]);
     }
@@ -896,8 +939,8 @@ Program Cpu::LoadProgram(std::string filename)
     }
 
     // Map system registers to segments
-    sp = stackSegment.readPointer+4095;
-    pc = codeSegment.readPointer;
+    sp = stackSegment.startPointer+4095;
+    pc = codeSegment.startPointer;
 
     activeProgram = {dataSegment, codeSegment, stackSegment, SaveToSnapshot()};
 
@@ -908,10 +951,12 @@ void Cpu::ExecuteProgram(Program program)
 {
     SetFromSnapshot(program.cpuSnapshot);
     activeProgram = program;
-    while(RAM[pc] != 0)
+    int i = RAM[pc];
+    while(i != 0)
     {
         Fetch();
         Decode();
+        i = RAM[pc];
     }
     program.cpuSnapshot = SaveToSnapshot();
 }

@@ -4,6 +4,7 @@
 //TODO: Write a make file
 //TODO: Implement memory segmentation
 
+//FIXME: only VAR mnem breaks on breakpoint
 int main(int argc, char** argv)
 {   
     if(argc == 1)

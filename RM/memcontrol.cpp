@@ -108,7 +108,7 @@ Segment Memcontrol::InitSegment(int direction)
     segment.memory = AllocateMemory(1<<12);
     pageNumber = segment.memory.usedPages[0];
     segment.writePointer = (pageNumber << 12) & 0b11111111100000000000;
-    segment.readPointer = (pageNumber << 12) & 0b11111111100000000000;
+    segment.startPointer = (pageNumber << 12) & 0b11111111100000000000;
     return segment;
 }
 
@@ -146,10 +146,11 @@ int Memcontrol::FindPtrAddress()
 
 int Memcontrol::FindVarAddress(Program program, int var)
 {
-    int startAddress = program.codeSegment.startPointer;
+    int startAddress = program.dataSegment.startPointer;
     for(int i = 0; i < 4096; i+=2)
     {
-        if(RAM[startAddress+i] == var)
+        int p = RAM[startAddress+i];
+        if(p == var)
         {
             return startAddress+i;
         }

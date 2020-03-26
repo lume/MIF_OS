@@ -1,6 +1,7 @@
 var a
-ptr p
-loadv a 
+loadi 85
 storev a
-loadp p
-storep p 
+var b
+loadv a
+inc
+storev b
