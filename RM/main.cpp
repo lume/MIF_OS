@@ -2,7 +2,9 @@
 #include "cpu.h"
 
 //TODO: Write a make file
+//TODO: Implement memory segmentation
 
+//FIXME: only VAR mnem breaks on breakpoint
 int main(int argc, char** argv)
 {   
     if(argc == 1)
@@ -15,14 +17,13 @@ int main(int argc, char** argv)
 
     Cpu cpu = Cpu();
 
-    cpu.LoadProgram(argv[1]);
+    Program program = cpu.LoadProgram(argv[1]);
+    cpu.ShowRam();
 
-    printf("RAM before execution:\n");
+    cpu.ExecuteProgram(program);
+
     cpu.ShowRam();
-    printf("Executing program:\n");
-    cpu.ExecuteProgram();
-    printf("RAM after execution:\n");
-    cpu.ShowRam();
+    
 
     return 0;
 }

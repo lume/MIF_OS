@@ -10,7 +10,7 @@
 #include <string>
 #include <string.h>
 
-#define RAM memcontroller.RAM
+//#define RAM memcontroller.RAM
 
 //TODO: encapsulate RAM read/write operations 
 
@@ -70,7 +70,13 @@ enum
     CMPA,
     CMPI,
     CMPR,
-    CALL
+    CALL,
+    VAR,
+    PTR,
+    LOADV,
+    LOADP,
+    STOREP,
+    STOREV
 };
 
 void Cpu::OP_STOP()
@@ -628,6 +634,59 @@ void Cpu::OP_SHL()
     pc++;
 }
 
+void Cpu::OP_VAR()
+{
+    pc++;
+    int x = RAM[pc];
+    if(memcontroller.CheckIfVarExists(activeProgram, x))
+    {
+        //TODO: implement raising exception that won't kill everyting when developing an OS
+        throw new std::runtime_error("Such variable already exists");
+    }
+    int varAddr = activeProgram.dataSegment.writePointer;
+    RAM[varAddr] = RAM[pc];
+    RAM[varAddr+1] = RAM[pc];
+    pc++;
+    activeProgram.dataSegment.writePointer += 2; 
+}
+
+void Cpu::OP_PTR()
+{
+    //TODO: Implement
+    pc++;
+    pc++;
+}
+
+void Cpu::OP_LOADP()
+{
+    //TODO: Implement
+    pc++;
+    pc++;
+}
+
+void Cpu::OP_LOADV()
+{
+    pc++;
+    int addr = memcontroller.FindVarAddress(activeProgram, RAM[pc]);
+    acc = RAM[addr+1];
+    pc++;
+}
+
+void Cpu::OP_STOREV()
+{
+    pc++;
+    int addr = memcontroller.FindVarAddress(activeProgram, RAM[pc]);
+    RAM[addr+1] = acc;
+    pc++;
+}
+
+void Cpu::OP_STOREP()
+{
+    //TODO: Implement
+    pc++;
+    pc++;    
+}
+
 void Cpu::UNDEFINED()
 {
     printf("UNDEFINED INSTRUCTION CODE");
@@ -784,6 +843,24 @@ void Cpu::Decode()
     case(CALL):
         OP_CALL();
         break;
+    case(VAR):
+        OP_VAR();
+        break;
+    case(PTR):
+        OP_PTR();
+        break;
+    case(STOREV):
+        OP_STOREV();
+        break;
+    case(LOADV):
+        OP_LOADV();
+        break;
+    case(LOADP):
+        OP_LOADP();
+        break;
+    case(STOREP):
+        OP_STOREP();
+        break;
     default:
         UNDEFINED();
         break;
@@ -794,12 +871,29 @@ void Cpu::Decode()
 
 void Cpu::ShowRam()
 {
+    printf("CODE:\n");
     printf("[");
-    for(int i = 0; i < RAM_SIZE; i++)
+    for(int i = 4096; i < 4197; i++)
     {
         printf("%d, ", RAM[i]);
     }
-    printf("]");
+    printf("]\n");
+
+    printf("STEK:\n");
+    printf("[");
+    for(int i = 12187; i < 12288; i++)
+    {
+        printf("%d, ", RAM[i]);
+    }
+    printf("]\n");
+
+    printf("DATA:\n");
+    printf("[");
+    for(int i = 0; i < 101; i++)
+    {
+        printf("%d, ", RAM[i]);
+    }
+    printf("]\n");
 
     if(zf)
         printf("zero flag is set!\n");
@@ -807,13 +901,17 @@ void Cpu::ShowRam()
         printf("sign flag is set!\n");
 }
 
-void Cpu::LoadProgram(std::string filename)
+Program Cpu::LoadProgram(std::string filename)
 { 
     //TODO: Rework program loading so it handles virtual memory correctly
     //For now we do not allow to have programs bigger than our RAM
     std::vector<int> machineCode;
     std::stringstream tempStream;
     std::ifstream ifile(filename);
+
+    Segment codeSegment;
+    Segment stackSegment;
+    Segment dataSegment;
 
     if(ifile)
     {
@@ -835,33 +933,61 @@ void Cpu::LoadProgram(std::string filename)
         exit(1);
     }
     
+    // Machine code is loaded to the list, now we load this code into RAM
+    dataSegment = memcontroller.InitSegment(0);
+    codeSegment = memcontroller.InitSegment(0);
+    stackSegment = memcontroller.InitSegment(1);
 
-    printf("\n");
-
-    for(int i = 0; i < machineCode.size(); i++)
-    {
-        printf("%d", machineCode[i]);
+    for(int i = 0; i < machineCode.size(); i++){
+        memcontroller.WriteSegment(codeSegment, codeSegment.writePointer, machineCode[i]);
+        codeSegment.writePointer++;
     }
 
-    if(machineCode.size() > RAM_SIZE)
-    {
-        printf("Not enough RAM space for this program!");
-        exit(1);
-    }
-    else
-    {
-        for(int i = 0; i < machineCode.size(); i++)
-        {
-            RAM[i] = machineCode[i];
-        }
-    }
+    // Map system registers to segments
+    sp = stackSegment.startPointer+4095;
+    pc = codeSegment.startPointer;
+
+    activeProgram = {dataSegment, codeSegment, stackSegment, SaveToSnapshot()};
+
+    return activeProgram;
 }
 
-void Cpu::ExecuteProgram()
+void Cpu::ExecuteProgram(Program program)
 {
-    while(RAM[pc] != 0)
+    SetFromSnapshot(program.cpuSnapshot);
+    activeProgram = program;
+    int i = RAM[pc];
+    while(i != 0)
     {
         Fetch();
         Decode();
+        i = RAM[pc];
     }
+    program.cpuSnapshot = SaveToSnapshot();
+}
+
+CpuSnapshot Cpu::SaveToSnapshot()
+{
+    CpuSnapshot snap;
+    snap.acc = acc;
+    snap.addr = addr;
+    snap.cReg = cReg;
+    snap.fs = fs;
+    snap.ir = ir;
+    snap.pc = pc;
+    snap.sp = sp;
+    snap.xReg = xReg;
+    return snap;
+}
+
+void Cpu::SetFromSnapshot(CpuSnapshot snapshot)
+{
+    acc = snapshot.acc;
+    addr = snapshot.addr;
+    cReg = snapshot.cReg;
+    fs = snapshot.fs;
+    sp = snapshot.sp;
+    ir = snapshot.ir;
+    pc = snapshot.pc;
+    xReg = snapshot.xReg;
 }

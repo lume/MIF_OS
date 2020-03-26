@@ -8,6 +8,7 @@
                 "-g",
                 "${workspaceFolder}\\RM\\main.cpp",
                 "${workspaceFolder}\\RM\\cpu.cpp",
+                "${workspaceFolder}\\RM\\memcontrol.cpp",
                 "-o",
                 "${workspaceFolder}\\RM\\test.exe",
                 "-std=c++17"

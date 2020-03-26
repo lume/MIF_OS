@@ -4,13 +4,36 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    
+        {
+            "name": "CompilerDebug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\Compiler\\compilerDebug.exe",
+            "args": [
+                "${workspaceFolder}\\Compiler\\test2.asm"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:\\ProgramData\\chocolatey\\bin\\gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
         {
             "name": "gcc.exe build and debug active file",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}\\RM\\test.exe",
             "args": [
-                "${workspaceFolder}\\RM\\01.asm"
+                "${workspaceFolder}\\RM\\out.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
