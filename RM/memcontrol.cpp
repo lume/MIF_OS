@@ -158,3 +158,16 @@ int Memcontrol::FindVarAddress(Program program, int var)
 
     throw new std::runtime_error("Failed to find variable");
 }
+
+bool Memcontrol::CheckIfVarExists(Program program, int var)
+{
+    int startAddress = program.dataSegment.startPointer;
+    for(int i = 0; i < 4096; i+=2)
+    {
+        if(RAM[startAddress+i] == var)
+        {
+            return true;
+        }
+    }
+    return false;
+}  

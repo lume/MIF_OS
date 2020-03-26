@@ -637,8 +637,13 @@ void Cpu::OP_SHL()
 void Cpu::OP_VAR()
 {
     pc++;
-    int varAddr = activeProgram.dataSegment.writePointer;
     int x = RAM[pc];
+    if(memcontroller.CheckIfVarExists(activeProgram, x))
+    {
+        //TODO: implement raising exception that won't kill everyting when developing an OS
+        throw new std::runtime_error("Such variable already exists");
+    }
+    int varAddr = activeProgram.dataSegment.writePointer;
     RAM[varAddr] = RAM[pc];
     RAM[varAddr+1] = RAM[pc];
     pc++;
