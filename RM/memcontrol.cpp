@@ -140,3 +140,20 @@ Memcontrol::Memcontrol()
         pageTable[i].used = false;
     }
 }
+
+int Memcontrol::FindPtrAddress()
+{}
+
+int Memcontrol::FindVarAddress(Program program, int var)
+{
+    int startAddress = program.codeSegment.startPointer;
+    for(int i = 0; i < 4096; i+=2)
+    {
+        if(RAM[startAddress+i] == var)
+        {
+            return startAddress+i;
+        }
+    }
+
+    throw new std::runtime_error("Failed to find variable");
+}

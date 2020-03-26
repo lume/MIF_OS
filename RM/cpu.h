@@ -5,26 +5,6 @@
 
 //TODO: implement data segment operations
 
-struct CpuSnapshot
-{
-    uint16_t pc = 0x0;   // program counter
-    uint16_t addr = 0x0; // internal addr register
-    uint16_t acc = 0x0;   // accumulator
-    uint16_t ir = 0x0;   // instruction register
-    int sp = RAM_SIZE - 1; // stack pointer 
-    uint16_t fs = 0x0; // flags
-    uint16_t xReg = 0x0; // x register
-    uint16_t cReg = 0x0; // c register
-};
-
-struct Program
-{
-    Segment dataSegment;
-    Segment codeSegment;
-    Segment stackSegment;
-    CpuSnapshot cpuSnapshot;
-};
-
 class Cpu
 {
     public:
@@ -37,6 +17,8 @@ class Cpu
 
     private:
         Memcontrol memcontroller = Memcontrol();
+
+        Program activeProgram;
         
         // Register definition
         uint16_t pc = 0x0;   // program counter
@@ -128,4 +110,12 @@ class Cpu
         void OP_CMPR(); // perform comparison between accumulator and value at register
 
         void OP_CALL(); // perform a long jump (uint 16 instead of 8)
+
+        // Data Segment/Heap management
+        void OP_VAR();
+        void OP_PTR();
+        void OP_LOADV();
+        void OP_STOREV();
+        void OP_LOADP();
+        void OP_STOREP();
 };

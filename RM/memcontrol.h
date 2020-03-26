@@ -30,9 +30,30 @@ struct Memory
 struct Segment
 {
     Memory memory;
-    int readPointer;  // Pointer to the piece of segment where last read occured
-    int writePointer; // Pointer to the piece of segment where last write occured
+    int writePointer;  // Pointer to the piece of segment where last write occured
+    int startPointer; // Pointer to the start of segment
     char direction;   // if is set to 1, memory write/read is backward (stack)
+};
+
+struct CpuSnapshot
+{
+    uint16_t pc = 0x0;   // program counter
+    uint16_t addr = 0x0; // internal addr register
+    uint16_t acc = 0x0;   // accumulator
+    uint16_t ir = 0x0;   // instruction register
+    int sp = RAM_SIZE - 1; // stack pointer 
+    uint16_t fs = 0x0; // flags
+    uint16_t xReg = 0x0; // x register
+    uint16_t cReg = 0x0; // c register
+};
+
+
+struct Program
+{
+    Segment dataSegment;
+    Segment codeSegment;
+    Segment stackSegment;
+    CpuSnapshot cpuSnapshot;
 };
 
 inline std::array<uint16_t, RAM_SIZE> RAM = {0};
@@ -56,6 +77,9 @@ class Memcontrol
         Segment InitSegment(int direction);
         void WriteSegment(Segment segment, int address, int value);
         uint16_t ReadSegment(Segment segment, int address);
+
+        int FindVarAddress(Program program, int var);
+        int FindPtrAddress();
 
     private:
         void MoveToSwap(int pageNumber); // TODO: this function needs IOControl

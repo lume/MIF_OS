@@ -628,6 +628,43 @@ void Cpu::OP_SHL()
     pc++;
 }
 
+void Cpu::OP_VAR()
+{
+    pc++;
+    int varAddr = activeProgram.codeSegment.writePointer;
+    RAM[varAddr] = RAM[pc];
+    pc++;
+    RAM[varAddr+1] = RAM[pc];
+    pc++;
+}
+
+void Cpu::OP_PTR()
+{}
+
+void Cpu::OP_LOADP()
+{
+
+}
+
+void Cpu::OP_LOADV()
+{
+    pc++;
+    int addr = memcontroller.FindVarAddress(activeProgram, RAM[pc]);
+    acc = RAM[addr+1];
+    pc++;
+}
+
+void Cpu::OP_STOREV()
+{
+    pc++;
+    int addr = memcontroller.FindVarAddress(activeProgram, RAM[pc]);
+    RAM[addr+1] = acc;
+    pc++;
+}
+
+void Cpu::OP_STOREP()
+{}
+
 void Cpu::UNDEFINED()
 {
     printf("UNDEFINED INSTRUCTION CODE");
@@ -862,12 +899,15 @@ Program Cpu::LoadProgram(std::string filename)
     sp = stackSegment.readPointer+4095;
     pc = codeSegment.readPointer;
 
-    return {dataSegment, codeSegment, stackSegment, SaveToSnapshot()};
+    activeProgram = {dataSegment, codeSegment, stackSegment, SaveToSnapshot()};
+
+    return activeProgram;
 }
 
 void Cpu::ExecuteProgram(Program program)
 {
     SetFromSnapshot(program.cpuSnapshot);
+    activeProgram = program;
     while(RAM[pc] != 0)
     {
         Fetch();

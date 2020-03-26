@@ -1,4 +1,3 @@
-//TODO: Test compilation
 #include "compiler.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -386,7 +385,6 @@ void compile_LABEL(char* line)
     }
 }
 
-//TODO: Make it same as Label, just store some value in address in data segment
 void compile_DATA(char* line)
 {
     char delim[] = " ";
