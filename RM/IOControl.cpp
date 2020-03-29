@@ -4,15 +4,31 @@
 #include <algorithm>
 #include <sys/stat.h>
 #include <bits/stdc++.h>
+#include <pthread.h>
 
 IOControl::IOControl(){}
 
-void IOControl::WriteData(int frameNumber, std::array<int, PAGE_SIZE> data)
+void IOControl::WriteSwapData(int frameNumber, std::array<int, PAGE_SIZE> data)
 {
-    std::string swapName = DISK_DIRECTORY + std::to_string(frameNumber);
+    pthread_t writeThread;
+    rwSwapData rwData = {frameNumber, data};
+
+    pthread_create(&writeThread, NULL, WriteSwapDataInternal, (void*)&rwData);
+    pthread_join(writeThread,NULL); 
+}
+
+std::array<int, PAGE_SIZE> IOControl::ReadSwapData(int frameNumber)
+{
+    return ReadSwapDataInternal(frameNumber);
+}
+
+void *(IOControl::WriteSwapDataInternal)(void* arg)
+{
+    rwSwapData *rwData = (rwSwapData*)arg;
+    std::string swapName = DISK_DIRECTORY + std::to_string(rwData->frameNumber);
     std::ofstream disk;
     disk.open(swapName, std::ofstream::out | std::ofstream::trunc);
-    for(int i : data)
+    for(int i : rwData->data)
     {
         std::string temp = std::to_string(i);
         disk << temp << " ";
@@ -20,7 +36,7 @@ void IOControl::WriteData(int frameNumber, std::array<int, PAGE_SIZE> data)
     disk.close();
 }
 
-std::array<int, PAGE_SIZE> IOControl::ReadData(int frameNumber)
+std::array<int, PAGE_SIZE> IOControl::ReadSwapDataInternal(int frameNumber)
 {
     std::string swapName = DISK_DIRECTORY + std::to_string(frameNumber);
     std::ifstream disk;
@@ -46,7 +62,7 @@ std::array<int, PAGE_SIZE> IOControl::ReadData(int frameNumber)
     return data;
 }
 
-std::vector<char> IOControl::ReadFromCharBuffer(int start, int end){}
+void IOControl::PrintCharBuffer(){}
 
 void IOControl::WriteIntoCharBuffer(int start, std::vector<char> data){}
 

@@ -939,8 +939,7 @@ Program Cpu::LoadProgram(std::string filename)
     stackSegment = memcontroller.InitSegment(1);
 
     for(int i = 0; i < machineCode.size(); i++){
-        memcontroller.WriteSegment(codeSegment, codeSegment.writePointer, machineCode[i]);
-        codeSegment.writePointer++;
+        memcontroller.WriteSegment(codeSegment, codeSegment.memory.addresses[i], machineCode[i]);
     }
 
     // Map system registers to segments

@@ -97,7 +97,9 @@ void Memcontrol::WriteSegment(Segment segment, int address, int value)
     }
 }
 
-uint16_t Memcontrol::ReadSegment(Segment segment, int address){}
+uint16_t Memcontrol::ReadSegment(Segment segment, int address){
+    //TODO: implement
+}
 
 Segment Memcontrol::InitSegment(int direction)
 {

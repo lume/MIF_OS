@@ -3,7 +3,6 @@
 #include <iostream>
 #include "IOControl.h"
 
-//TODO: Write a make file
 //TODO: Implement memory segmentation
 
 int main(int argc, char** argv)
@@ -29,15 +28,15 @@ int main(int argc, char** argv)
     c.InitDisk();
 
     std::array<int, 4096> testArr;
-    testArr[0] = 1;
-    testArr[1] = 1;
-    testArr[2] = 1;
-    testArr[3] = 1;
-    testArr[4] = 1;
+    testArr[0] = 1337;
+    testArr[1] = 1889;
+    testArr[2] = 12333;
+    testArr[3] = 322;
+    testArr[4] = 1322;
     
 
-    c.WriteData(256, testArr);
-    auto d = c.ReadData(256);
+    c.WriteSwapData(256, testArr);
+    auto d = c.ReadSwapData(256);
     int z = 0;
 
     for(auto i : d)
