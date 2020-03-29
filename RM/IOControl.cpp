@@ -6,20 +6,41 @@
 #include <bits/stdc++.h>
 #include <pthread.h>
 
-IOControl::IOControl(){}
+IOControl::IOControl()
+{
+    pthread_mutex_init(&swapMutex, NULL);
+    /*int semStatus = sem_init(&swapMutex, 0, 1);
+    if(semStatus == -1)
+    {
+        std::perror("An error occured when initialising a mutex!");
+    }*/
+}
+
+IOControl::~IOControl()
+{
+    //sem_destroy(&swapMutex);
+}
 
 void IOControl::WriteSwapData(int frameNumber, std::array<int, PAGE_SIZE> data)
 {
     pthread_t writeThread;
     rwSwapData rwData = {frameNumber, data};
-
     pthread_create(&writeThread, NULL, WriteSwapDataInternal, (void*)&rwData);
-    pthread_join(writeThread,NULL); 
+    pthread_join(writeThread, NULL);
 }
 
 std::array<int, PAGE_SIZE> IOControl::ReadSwapData(int frameNumber)
 {
-    return ReadSwapDataInternal(frameNumber);
+    pthread_t readThread;
+    rwSwapData rwData = {frameNumber, NULL}; // TODO: Possibly a different struct should be created
+    
+    void* returnedData;
+    
+    pthread_create(&readThread, NULL, ReadSwapDataInternal, (void*)&rwData);
+    pthread_join(readThread, &returnedData);
+    
+    rwSwapData *resultRwData = (rwSwapData*)returnedData;
+    return resultRwData->data;
 }
 
 void *(IOControl::WriteSwapDataInternal)(void* arg)
@@ -27,6 +48,9 @@ void *(IOControl::WriteSwapDataInternal)(void* arg)
     rwSwapData *rwData = (rwSwapData*)arg;
     std::string swapName = DISK_DIRECTORY + std::to_string(rwData->frameNumber);
     std::ofstream disk;
+    
+    // Critical section:
+    pthread_mutex_lock(&swapMutex);
     disk.open(swapName, std::ofstream::out | std::ofstream::trunc);
     for(int i : rwData->data)
     {
@@ -34,18 +58,26 @@ void *(IOControl::WriteSwapDataInternal)(void* arg)
         disk << temp << " ";
     }
     disk.close();
+    // End of critical section
+    pthread_mutex_unlock(&swapMutex);
+
+    //FIXME: Compiler complains that nothing is returned here...
 }
 
-std::array<int, PAGE_SIZE> IOControl::ReadSwapDataInternal(int frameNumber)
+void *(IOControl::ReadSwapDataInternal)(void *arg)
 {
-    std::string swapName = DISK_DIRECTORY + std::to_string(frameNumber);
+    rwSwapData *rwData = (rwSwapData*)arg;
+    std::string swapName = DISK_DIRECTORY + std::to_string(rwData->frameNumber);
     std::ifstream disk;
+    pthread_mutex_lock(&swapMutex);
+    // Critical section:
     disk.open(swapName);
 
     std::string temp((std::istreambuf_iterator<char>(disk)),
                     std::istreambuf_iterator<char>());
     disk.close();
-
+    // End of critical section
+    pthread_mutex_unlock(&swapMutex);
     std::array<int, PAGE_SIZE> data;
     int dataIterator = 0;
     std::istringstream ss(temp);
@@ -58,8 +90,8 @@ std::array<int, PAGE_SIZE> IOControl::ReadSwapDataInternal(int frameNumber)
         }
         dataIterator++;
     }while(dataIterator < PAGE_SIZE);
-
-    return data;
+    rwData->data = data;
+    return rwData;
 }
 
 void IOControl::PrintCharBuffer(){}

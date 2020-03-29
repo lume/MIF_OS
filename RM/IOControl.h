@@ -2,6 +2,7 @@
 
 #include <array>
 #include <vector>
+#include <semaphore.h>
 // IOControl is responsible for accessing disk and managing keyboard
 
 #define DISK_NAME "devDrv.txt"
@@ -12,6 +13,9 @@
 #define SECTOR_COUNT 1048576 / SECTOR_SIZE
 #define CHAR_BUFFER_SIZE 4096 // amount of characters that can be displayed
 //sectors are fixed size: 512 entries (or bytes)
+
+// This mutex is to be used for file read/write operations
+inline pthread_mutex_t swapMutex;
 
 typedef struct rwSwapData
 {
@@ -26,6 +30,7 @@ class IOControl
 {
     public:
         IOControl();
+        ~IOControl();
         
         //These things should be launched in threads
         void WriteSwapData(int frameNumber, std::array<int, PAGE_SIZE> data);
@@ -40,7 +45,7 @@ class IOControl
         void InitCharBuffer();
     private:
         static void* WriteSwapDataInternal(void* arg);
-        std::array<int, PAGE_SIZE> ReadSwapDataInternal(int frameNumber); // returns an array of data from a disk
+        static void* ReadSwapDataInternal(void* arg); // returns an array of data from a disk
         bool DriveExists();
         std::fstream& GotoLine(std::fstream& file, int lineNum);
 };
