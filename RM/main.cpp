@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "cpu.h"
-
+#include <iostream>
 #include "IOControl.h"
 
 //TODO: Write a make file
@@ -37,6 +37,16 @@ int main(int argc, char** argv)
     
 
     c.WriteData(256, testArr);
+    auto d = c.ReadData(256);
+    int z = 0;
+
+    for(auto i : d)
+    {
+        if(z == 4095)
+            break;
+        std::cout << i << " ";
+        z++;
+    }
 
     return 0;
 }

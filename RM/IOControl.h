@@ -5,6 +5,7 @@
 // IOControl is responsible for accessing disk and managing keyboard
 
 #define DISK_NAME "devDrv.txt"
+#define DISK_DIRECTORY "swapdisk/"
 #define DISK_SIZE 1048576
 #define PAGE_SIZE 4096
 #define SECTOR_SIZE 4096
