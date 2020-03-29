@@ -28,5 +28,15 @@ int main(int argc, char** argv)
     IOControl c = IOControl();
     c.InitDisk();
 
+    std::array<int, 4096> testArr;
+    testArr[0] = 1;
+    testArr[1] = 1;
+    testArr[2] = 1;
+    testArr[3] = 1;
+    testArr[4] = 1;
+    
+
+    c.WriteData(256, testArr);
+
     return 0;
 }

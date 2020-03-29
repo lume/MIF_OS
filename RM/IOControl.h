@@ -7,7 +7,7 @@
 #define DISK_NAME "devDrv.txt"
 #define DISK_SIZE 1048576
 #define PAGE_SIZE 4096
-#define SECTOR_SIZE 512
+#define SECTOR_SIZE 4096
 #define SECTOR_COUNT 1048576 / SECTOR_SIZE
 #define CHAR_BUFFER 4096 // amount of characters that can be displayed
 //sectors are fixed size: 512 entries (or bytes)
@@ -36,4 +36,5 @@ class IOControl
         void InitDisk();
     private:
         bool DriveExists();
+        std::fstream& GotoLine(std::fstream& file, int lineNum);
 };
