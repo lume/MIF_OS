@@ -124,6 +124,7 @@ void Memcontrol::WriteSegment(Segment segment, int address, int value)
 
 uint16_t Memcontrol::ReadSegment(Segment segment, int address){
     //TODO: implement
+    return 0;
 }
 
 Segment Memcontrol::InitSegment(int direction)
@@ -169,7 +170,9 @@ Memcontrol::Memcontrol()
 }
 
 int Memcontrol::FindPtrAddress()
-{}
+{
+    return 0;
+}
 
 int Memcontrol::FindVarAddress(Program program, int var)
 {

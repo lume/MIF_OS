@@ -75,6 +75,11 @@ void *(IOControl::ReadSwapDataInternal)(void *arg)
     std::string temp((std::istreambuf_iterator<char>(disk)),
                     std::istreambuf_iterator<char>());
     disk.close();
+    int status = remove(swapName.c_str());
+    if(status == -1)
+    {
+        std::perror("Could not remove swap file.");
+    }
     // End of critical section
     pthread_mutex_unlock(&swapMutex);
     std::array<int, PAGE_SIZE> data;

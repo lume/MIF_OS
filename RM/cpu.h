@@ -11,7 +11,7 @@ class Cpu
         Cpu(){}
         void ShowRam(); // Show the contents of the RAM
         Program LoadProgram(std::string filename);// Load the Program machine code to the memory
-        void ExecuteProgram(Program program); // Execute the loaded program
+        void ExecuteProgram(Program program, int cycles); // Execute the loaded program for some cycles
         CpuSnapshot SaveToSnapshot();
         void SetFromSnapshot(CpuSnapshot snapshot);
 
