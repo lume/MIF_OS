@@ -20,7 +20,8 @@ enum
 {
     sf = 1 << 0,
     zf = 1 << 1,
-    lf = 1 << 2
+    lf = 1 << 2,
+    ef = 1 << 3
 };
 
 // Instruction definition
@@ -82,7 +83,8 @@ enum
 
 void Cpu::OP_STOP()
 {
-    exit(0);
+    std::cout << "Program exited with code 0" << std::endl;
+    fs |= ef;
 }
 
 void Cpu::OP_LOADA()
@@ -880,7 +882,7 @@ void Cpu::ShowRam()
     }
     printf("]\n");
 
-    printf("STEK:\n");
+    printf("STACK:\n");
     printf("[");
     for(int i = 12187; i < 12288; i++)
     {
@@ -952,23 +954,23 @@ Program Cpu::LoadProgram(std::string filename)
     return activeProgram;
 }
 
-void Cpu::ExecuteProgram(Program program)
+void Cpu::ExecuteProgram(Program program, int cycles)
 {
     SetFromSnapshot(program.cpuSnapshot);
     activeProgram = program;
-    int i = RAM[pc];
-    while(i != 0)
+    int c = 0;
+    while(c < cycles && (fs & ef) == 0)
     {
         try
         {
             Fetch();
             Decode();
-            i = RAM[pc];
         }
         catch(std::runtime_error &error)
         {
             throw error;
         }
+        c++;
     }
     program.cpuSnapshot = SaveToSnapshot();
 }
