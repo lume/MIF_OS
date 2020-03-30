@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <string.h>
+#include <iostream>
 
 //#define RAM memcontroller.RAM
 
@@ -640,7 +641,7 @@ void Cpu::OP_VAR()
     int x = RAM[pc];
     if(memcontroller.CheckIfVarExists(activeProgram, x))
     {
-        //TODO: implement raising exception that won't kill everyting when developing an OS
+        std::cout << "CRASH!!! Such variable already exists! " << char(x) << std::endl;
         throw new std::runtime_error("Such variable already exists");
     }
     int varAddr = activeProgram.dataSegment.writePointer;
@@ -939,12 +940,11 @@ Program Cpu::LoadProgram(std::string filename)
     stackSegment = memcontroller.InitSegment(1);
 
     for(int i = 0; i < machineCode.size(); i++){
-        memcontroller.WriteSegment(codeSegment, codeSegment.writePointer, machineCode[i]);
-        codeSegment.writePointer++;
+        memcontroller.WriteSegment(codeSegment, codeSegment.memory.addresses[i], machineCode[i]);
     }
 
     // Map system registers to segments
-    sp = stackSegment.startPointer+4095;
+    sp = stackSegment.startPointer+PAGE_SIZE-1;
     pc = codeSegment.startPointer;
 
     activeProgram = {dataSegment, codeSegment, stackSegment, SaveToSnapshot()};
@@ -959,9 +959,16 @@ void Cpu::ExecuteProgram(Program program)
     int i = RAM[pc];
     while(i != 0)
     {
-        Fetch();
-        Decode();
-        i = RAM[pc];
+        try
+        {
+            Fetch();
+            Decode();
+            i = RAM[pc];
+        }
+        catch(std::runtime_error &error)
+        {
+            throw error;
+        }
     }
     program.cpuSnapshot = SaveToSnapshot();
 }

@@ -2,6 +2,7 @@
 #include <array>
 #include <map>
 #include <vector>
+#include "IOControl.h"
 // memcontrol is responsible for access to RAM, paging. See this as the MMU
 
 #define RAM_SIZE 1048576
@@ -83,7 +84,10 @@ class Memcontrol
         int FindPtrAddress();
 
     private:
-        void MoveToSwap(int pageNumber); // TODO: this function needs IOControl
+        IOControl iocontroller = IOControl();
+
+        void MoveToSwap(int pageNumber); 
+        void GetFromSwap(int pageNumber);
         int FindLeastAccessedPage();
         std::vector<int> GetAddressList(std::vector<int> pages);
 };
