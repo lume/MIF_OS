@@ -1,15 +1,18 @@
 #include "memcontrol.h"
 #include <algorithm>
+#include <iostream>
 
 Memory Memcontrol::AllocateMemory(uint16_t size)
 {
     std::vector<int> memPageNumbers;
     int pageCount = 0;
 
-    if(size % 4 == 0)
-        pageCount = size/4096;    
+    if(size % PAGE_SIZE == 0)
+        pageCount = size/PAGE_SIZE;    
     else
-        pageCount = size/4096 + 1;
+        pageCount = size/PAGE_SIZE + 1;
+
+
 
     for(int i = 0; i < PAGETABLE_SIZE; i++)
     {
@@ -52,7 +55,10 @@ int Memcontrol::FindLeastAccessedPage()
         if(leastAccessed > pageTable[i].timesAccessed && pageTable[i].used == false)
             leastAccessed = pageTable[i].timesAccessed;
     }
-    return leastAccessed;
+    if(leastAccessed > PAGETABLE_SIZE + FRAMETABLE_SIZE)
+        throw new std::runtime_error("Out of memory :(");
+    else
+        return leastAccessed;
 }
 
 void Memcontrol::WriteRAM(int address, int value)
@@ -84,7 +90,26 @@ uint16_t Memcontrol::ReadRAM(int address)
 }
 
 void Memcontrol::MoveToSwap(int pageNumber)
-{}
+{
+    std::array<int, PAGE_SIZE> pageData;
+    int memStart = pageTable[pageNumber].frame * PAGE_SIZE;
+
+    for(int i = 0; i < PAGE_SIZE; i++)
+    {
+        pageData[i] = memStart+i;
+    }
+
+    iocontroller.WriteSwapData(pageNumber, pageData);
+}
+
+void Memcontrol::GetFromSwap(int pageNumber)
+{
+    std::array<int, PAGE_SIZE> data = iocontroller.ReadSwapData(pageNumber+256);
+    for(int i = 0; i < PAGE_SIZE; i++)
+    {
+        RAM[pageTable[pageNumber].frame+i] = data[i];
+    }
+}
 
 void Memcontrol::WriteSegment(Segment segment, int address, int value)
 {

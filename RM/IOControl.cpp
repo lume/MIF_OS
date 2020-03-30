@@ -8,17 +8,17 @@
 
 IOControl::IOControl()
 {
-    pthread_mutex_init(&swapMutex, NULL);
-    /*int semStatus = sem_init(&swapMutex, 0, 1);
-    if(semStatus == -1)
+    InitDisk();
+    int mutexStatus = pthread_mutex_init(&swapMutex, NULL);
+    if(mutexStatus == -1)
     {
         std::perror("An error occured when initialising a mutex!");
-    }*/
+    }
 }
 
 IOControl::~IOControl()
 {
-    //sem_destroy(&swapMutex);
+    pthread_mutex_destroy(&swapMutex);
 }
 
 void IOControl::WriteSwapData(int frameNumber, std::array<int, PAGE_SIZE> data)
@@ -60,8 +60,7 @@ void *(IOControl::WriteSwapDataInternal)(void* arg)
     disk.close();
     // End of critical section
     pthread_mutex_unlock(&swapMutex);
-
-    //FIXME: Compiler complains that nothing is returned here...
+    return rwData;
 }
 
 void *(IOControl::ReadSwapDataInternal)(void *arg)
