@@ -3,13 +3,7 @@
 #include <array>
 #include <vector>
 #include <semaphore.h>
-// IOControl is responsible for accessing disk and managing keyboard
-
-#ifdef DEBUG
-    #include "DebugDefines.h"
-#else
-    #include "ReleaseDefines.h"
-#endif
+#include "SizeDefinitions.h"
 
 // This mutex is to be used for file read/write operations
 inline pthread_mutex_t swapMutex;

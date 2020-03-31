@@ -15,7 +15,7 @@ class RmTest
 
     private:
         bool LoadProgramTest_GivenRamIsEnough_AllocateMemoryCorrectly();
-        bool LoadProgramTest_GivenNotEnoughRam_AllocateMemoryOnSwap();
+        bool LoadProgramTest_GivenNotEnoughRam_MoveMemoryToSwap();
         bool LoadProgramTest_GivenNotEnoughMemory_FailToAllocate();
         bool LoadProgramTest_GivenProgramTooBigForSinglePage_AllocateOnMultiplePages();
         bool ExecuteProgramTest_GivenLoadedProgram_ExecuteSuccesfully();

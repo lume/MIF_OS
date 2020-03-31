@@ -3,20 +3,17 @@
 #include <map>
 #include <vector>
 #include "IOControl.h"
-
-#ifdef DEBUG
-    #include "DebugDefines.h"
-#else
-    #include "ReleaseDefines.h"
-#endif
+#include "SizeDefinitions.h"
 
 //pages and frames are fixed size (4kb)
 
 struct Page 
 {
     bool used;
+    bool onDisk;
     int timesAccessed;
-    int frame; // if frame > 255, we go to a swap in our disk
+    int frame; 
+    int swapSector;
 };
 
 struct Memory
@@ -65,7 +62,7 @@ class Memcontrol
     public: 
         Memcontrol();
 
-        Memory AllocateMemory(uint16_t size);
+        Memory AllocateMemory(uint16_t size, std::vector<int> pagesToIgnore = {});
         void FreeMemory(Memory mem);
 
         // Write and Read operations translate virtual address into physical
@@ -73,7 +70,7 @@ class Memcontrol
         uint16_t ReadRAM(int address);
 
         // Segment control operations
-        Segment InitSegment(int direction);
+        Segment InitSegment(int direction, Program program, int pageCount = 1);
         void WriteSegment(Segment segment, int address, int value);
         uint16_t ReadSegment(Segment segment, int address);
 
@@ -84,8 +81,8 @@ class Memcontrol
     private:
         IOControl iocontroller = IOControl();
 
-        void MoveToSwap(int pageNumber); 
+        bool MoveToSwap(int pageNumber); 
         void GetFromSwap(int pageNumber);
-        int FindLeastAccessedPage();
+        int FindLeastAccessedPage(std::vector<int> collectedPages);
         std::vector<int> GetAddressList(std::vector<int> pages);
 };
