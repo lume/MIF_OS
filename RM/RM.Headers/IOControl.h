@@ -5,14 +5,11 @@
 #include <semaphore.h>
 // IOControl is responsible for accessing disk and managing keyboard
 
-#define DISK_NAME "devDrv.txt"
-#define DISK_DIRECTORY "swapdisk/"
-#define DISK_SIZE 1048576
-#define PAGE_SIZE 4096
-#define SECTOR_SIZE 4096
-#define SECTOR_COUNT 1048576 / SECTOR_SIZE
-#define CHAR_BUFFER_SIZE 4096 // amount of characters that can be displayed
-//sectors are fixed size: 512 entries (or bytes)
+#ifdef DEBUG
+    #include "DebugDefines.h"
+#else
+    #include "ReleaseDefines.h"
+#endif
 
 // This mutex is to be used for file read/write operations
 inline pthread_mutex_t swapMutex;

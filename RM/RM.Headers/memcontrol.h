@@ -3,16 +3,14 @@
 #include <map>
 #include <vector>
 #include "IOControl.h"
-// memcontrol is responsible for access to RAM, paging. See this as the MMU
 
-#define RAM_SIZE 1048576
-#define VRAM_SIZE 2097152
-#define PAGETABLE_SIZE 512 // 512 pages 4kb each 
-#define FRAMETABLE_SIZE 256 // 256 frames of physical memory
+#ifdef DEBUG
+    #include "DebugDefines.h"
+#else
+    #include "ReleaseDefines.h"
+#endif
 
-//TODO: Implement virtual memory here
-
-//pages amd frames are fixed size (4kb)
+//pages and frames are fixed size (4kb)
 
 struct Page 
 {
