@@ -52,8 +52,8 @@ struct Program
     CpuSnapshot cpuSnapshot;
 };
 
-inline std::array<uint16_t, RAM_SIZE> RAM = {0};
-inline std::array<uint16_t, VRAM_SIZE> VRAM = {0};
+inline std::array<int, RAM_SIZE> RAM = {0};
+inline std::array<int, VRAM_SIZE> VRAM = {0};
 inline std::array<Page, PAGETABLE_SIZE> pageTable;
 inline std::array<int, FRAMETABLE_SIZE> frameTable;
 

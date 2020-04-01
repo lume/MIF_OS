@@ -41,6 +41,36 @@ void RmTest::RunAllTests()
     {
         std::cout << "FAILED" << std::endl;
     }
+
+    std::cout << "LoadProgramTest_GivenProgramTooBigForSinglePage_AllocateOnMultiplePages...";
+    if(LoadProgramTest_GivenProgramTooBigForSinglePage_AllocateOnMultiplePages())
+    {
+        std::cout << "PASSED" << std::endl;
+    }
+    else 
+    {
+        std::cout << "FAILED" << std::endl;
+    }
+
+    std::cout << "ExecuteProgramTest_GivenLoadedProgram_ExecuteSuccesfully...";
+    if(ExecuteProgramTest_GivenLoadedProgram_ExecuteSuccesfully())
+    {
+        std::cout << "PASSED" << std::endl;
+    }
+    else 
+    {
+        std::cout << "FAILED" << std::endl;
+    }
+
+    std::cout << "ExecuteProgramTest_GivenLoadedProgramMultiPages_ExecuteSuccesfully...";
+    if(ExecuteProgramTest_GivenLoadedProgramMultiPages_ExecuteSuccesfully())
+    {
+        std::cout << "PASSED" << std::endl;
+    }
+    else 
+    {
+        std::cout << "FAILED" << std::endl;
+    }
 }
 
 bool RmTest::LoadProgramTest_GivenRamIsEnough_AllocateMemoryCorrectly()
@@ -107,8 +137,49 @@ bool RmTest::LoadProgramTest_GivenNotEnoughMemory_FailToAllocate()
     return false;
 }
 
-bool RmTest::LoadProgramTest_GivenProgramTooBigForSinglePage_AllocateOnMultiplePages(){}
+bool RmTest::LoadProgramTest_GivenProgramTooBigForSinglePage_AllocateOnMultiplePages()
+{
+    Cpu cpu = Cpu();
+    Program program = cpu.LoadProgram("big.txt");
 
-bool RmTest::ExecuteProgramTest_GivenLoadedProgram_ExecuteSuccesfully(){}
+    return program.codeSegment.memory.usedPages.size() == 2;
+}
 
-bool RmTest::ExecuteProgramTest_GivenLoadedProgramMultiPages_ExecuteSuccesfully(){}
+bool RmTest::ExecuteProgramTest_GivenLoadedProgram_ExecuteSuccesfully()
+{
+    Cpu cpu = Cpu();
+    Program program = cpu.LoadProgram("small.txt");
+    std::vector<int> expectedDataSegm = {97, 10, 98, 100, 99, 110};
+
+    cpu.ShowRam();
+
+    cpu.ExecuteProgram(program, 10000);
+
+    cpu.ShowRam();
+
+    for(int i = 0; i < expectedDataSegm.size(); i++)
+    {
+        int x = RAM[program.dataSegment.memory.addresses[i]];
+        if(x != expectedDataSegm[i])
+            return false;
+    }
+
+    return true;
+}
+
+bool RmTest::ExecuteProgramTest_GivenLoadedProgramMultiPages_ExecuteSuccesfully()
+{
+    Cpu cpu = Cpu();
+    Program program = cpu.LoadProgram("big.txt");
+    std::vector<int> expectedDataSegm = {122, 4800};
+
+    cpu.ExecuteProgram(program, 10000);
+
+    for(int i = 0; i < expectedDataSegm.size(); i++)
+    {
+        if(RAM[program.dataSegment.memory.addresses[i]] != expectedDataSegm[i])
+            return false;
+    }
+
+    return true;
+}

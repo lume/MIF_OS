@@ -13,3 +13,5 @@ release:
 pedantic:
 	g++ -IRM/RM.Headers $(CFLAGS) RM/main.cpp RM/cpu.cpp RM/memcontrol.cpp RM/IOControl.cpp RM/Clock.cpp -o rmPedantic -Wall -pedantic
 
+compiler:
+	g++ -ICompiler/ Compiler/main.cpp Compiler/compiler.cpp -o compiler

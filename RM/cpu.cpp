@@ -83,7 +83,6 @@ enum
 
 void Cpu::OP_STOP()
 {
-    std::cout << "Program exited with code 0" << std::endl;
     fs |= ef;
 }
 
@@ -98,7 +97,8 @@ void Cpu::OP_LOADA()
 void Cpu::OP_LOADI()
 {
     pc++;
-    acc = RAM[activeProgram.codeSegment.memory.addresses[pc]]-48;
+    int varVal = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    acc = varVal;
     pc++;
 }
 
@@ -875,27 +875,27 @@ void Cpu::Decode()
 
 void Cpu::ShowRam()
 {
-    printf("CODE:\n");
+    printf("CODE: (starting from %d)\n", activeProgram.codeSegment.memory.addresses[0]);
     printf("[");
-    for(int i = 4096; i < 4197; i++)
+    for(int i = 0; i < 100; i++)
     {
-        printf("%d, ", RAM[i]);
+        printf("%d, ", RAM[activeProgram.codeSegment.memory.addresses[i]]);
     }
     printf("]\n");
 
-    printf("STACK:\n");
+    printf("STACK: (starting from %d)\n", activeProgram.stackSegment.memory.addresses[0]);
     printf("[");
-    for(int i = 12187; i < 12288; i++)
+    for(int i = 0; i < 100; i++)
     {
-        printf("%d, ", RAM[i]);
+        printf("%d, ", RAM[activeProgram.stackSegment.memory.addresses[i]]);
     }
     printf("]\n");
 
-    printf("DATA:\n");
+    printf("DATA:(starting from %d)\n", activeProgram.dataSegment.memory.addresses[0]);
     printf("[");
-    for(int i = 0; i < 101; i++)
+    for(int i = 0; i < 100; i++)
     {
-        printf("%d, ", RAM[i]);
+        printf("%d, ", RAM[activeProgram.dataSegment.memory.addresses[i]]);
     }
     printf("]\n");
 }
@@ -964,7 +964,7 @@ void Cpu::ExecuteProgram(Program program, int cycles)
     SetFromSnapshot(program.cpuSnapshot);
     activeProgram = program;
     int c = 0;
-    cycles = 148000;
+    cycles = 148000; //TODO: remove later!
     while(c < cycles && (fs & ef) == 0)
     {
         try
