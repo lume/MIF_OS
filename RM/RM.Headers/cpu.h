@@ -9,18 +9,16 @@ class Cpu
 {
     public:
         Memcontrol memcontroller = Memcontrol();
+        Program activeProgram;
 
         Cpu(){}
         void ShowRam(); // Show the contents of the RAM
         Program LoadProgram(std::string filename);// Load the Program machine code to the memory
-        void ExecuteProgram(Program program, int cycles = 14800); // Execute the loaded program for some cycles
+        Program ExecuteProgram(Program program, int cycles = 14800); // Execute the loaded program for some cycles
         CpuSnapshot SaveToSnapshot();
         void SetFromSnapshot(CpuSnapshot snapshot);
 
     private:
-
-        Program activeProgram;
-        
         // Register definition
         int pc = 0x0;   // program counter
         int addr = 0x0; // internal addr register

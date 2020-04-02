@@ -3,18 +3,16 @@
 #include "cpu.h"
 #include "memcontrol.h"
 #include "IOControl.h"
-
-// Clock is responsible for calling updates on each module
-#define DEFAULT_CPU_TIME 100 //100 cycles
+#include "UI.h"
 
 class Clock
 {
     public:
         bool isOn;
 
-        Clock();
+        Clock(Cpu cpu, bool step);
         void Update();
-        void Start();
+        void Start(std::string programName, UI ui);
     private:
         Cpu cpu;
         Memcontrol memcontrol;
@@ -22,4 +20,6 @@ class Clock
         Program activeProgram;
 
         void InitSwapDisk();
+        UI ui = UI();
+        bool step;
 };
