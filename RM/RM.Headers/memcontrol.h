@@ -4,6 +4,7 @@
 #include <vector>
 #include "IOControl.h"
 #include "SizeDefinitions.h"
+#include <limits>
 
 //pages and frames are fixed size (4kb)
 
@@ -33,14 +34,14 @@ struct Segment
 
 struct CpuSnapshot
 {
-    uint16_t pc = 0x0;   // program counter
-    uint16_t addr = 0x0; // internal addr register
-    uint16_t acc = 0x0;   // accumulator
-    uint16_t ir = 0x0;   // instruction register
+    int pc = 0x0;   // program counter
+    int addr = 0x0; // internal addr register
+    int acc = 0x0;   // accumulator
+    int ir = 0x0;   // instruction register
     int sp = RAM_SIZE - 1; // stack pointer 
-    uint16_t fs = 0x0; // flags
-    uint16_t xReg = 0x0; // x register
-    uint16_t cReg = 0x0; // c register
+    int fs = 0x0; // flags
+    int xReg = 0x0; // x register
+    int cReg = 0x0; // c register
 };
 
 
@@ -70,7 +71,7 @@ class Memcontrol
         uint16_t ReadRAM(int address);
 
         // Segment control operations
-        Segment InitSegment(int direction, Program program, int pageCount = 1);
+        Segment InitSegment(int direction, int pageCount = 1);
         void WriteSegment(Segment segment, int address, int value);
         uint16_t ReadSegment(Segment segment, int address);
 
@@ -78,11 +79,20 @@ class Memcontrol
         int FindVarAddress(Program program, int var);
         int FindPtrAddress();
 
+        Program PrepareProgramMemory(Program program);
+        int ConvertToPhysAddress(int addr);
+        
+        int MoveToSwap(int pageNumber); 
+
     private:
+        std::vector<int> freeFramePool;
+        std::vector<int> freeSectorPool;
+
         IOControl iocontroller = IOControl();
 
-        bool MoveToSwap(int pageNumber); 
-        void GetFromSwap(int pageNumber);
-        int FindLeastAccessedPage(std::vector<int> collectedPages);
+        void ClearPageBeforeUse(int page);
+
+        std::array<int, PAGE_SIZE> GetFromSwap(int pageNumber);
+        int FindLeastAccessedPage(std::vector<int> collectedPages = {});
         std::vector<int> GetAddressList(std::vector<int> pages);
 };

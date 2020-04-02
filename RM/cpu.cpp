@@ -89,7 +89,7 @@ void Cpu::OP_STOP()
 void Cpu::OP_LOADA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc = RAM[addr];
     pc++;
 }
@@ -97,15 +97,15 @@ void Cpu::OP_LOADA()
 void Cpu::OP_LOADI()
 {
     pc++;
-    int varVal = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    int varVal = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc = varVal;
     pc++;
 }
-
+//TODO: Convert RM into VM addresses
 void Cpu::OP_LOADR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     
     if(c == 'x')
         acc = xReg;
@@ -118,7 +118,7 @@ void Cpu::OP_LOADR()
 void Cpu::OP_STOREA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     RAM[addr] = acc;
     pc++;
 }
@@ -126,7 +126,7 @@ void Cpu::OP_STOREA()
 void Cpu::OP_STORER()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         xReg = acc;
@@ -139,7 +139,7 @@ void Cpu::OP_STORER()
 void Cpu::OP_ADDA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc += RAM[addr];
     if(acc < 0)
         fs |= sf;
@@ -151,7 +151,7 @@ void Cpu::OP_ADDA()
 void Cpu::OP_ADDI()
 {
     pc++;
-    acc += RAM[activeProgram.codeSegment.memory.addresses[pc]]-48;
+    acc += RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48;
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
@@ -162,7 +162,7 @@ void Cpu::OP_ADDI()
 void Cpu::OP_ADDR()
 {
     pc++;  
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         acc += xReg;
@@ -179,7 +179,7 @@ void Cpu::OP_ADDR()
 void Cpu::OP_SUBA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc -= RAM[addr];
     if(acc < 0)
         fs |= sf;
@@ -191,7 +191,7 @@ void Cpu::OP_SUBA()
 void Cpu::OP_SUBI()
 {
     pc++;
-    acc += RAM[activeProgram.codeSegment.memory.addresses[pc]]-48;
+    acc += RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48;
 
     if(acc < 0)
         fs |= sf;
@@ -203,7 +203,7 @@ void Cpu::OP_SUBI()
 void Cpu::OP_SUBR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         acc -= xReg;
@@ -220,7 +220,7 @@ void Cpu::OP_SUBR()
 void Cpu::OP_MULA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc *= RAM[addr];
 
     if(acc < 0)
@@ -233,7 +233,7 @@ void Cpu::OP_MULA()
 void Cpu::OP_MULI()
 {
     pc++;
-    acc *= (RAM[activeProgram.codeSegment.memory.addresses[pc]]-48);
+    acc *= (RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48);
     
     if(acc < 0)
         fs |= sf;
@@ -245,7 +245,7 @@ void Cpu::OP_MULI()
 void Cpu::OP_MULR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         acc *= xReg;
@@ -262,7 +262,7 @@ void Cpu::OP_MULR()
 void Cpu::OP_DIVA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc = acc / RAM[addr];
     if(acc < 0)
         fs |= sf;
@@ -274,7 +274,7 @@ void Cpu::OP_DIVA()
 void Cpu::OP_DIVI()
 {
     pc++;
-    acc = acc / (RAM[activeProgram.codeSegment.memory.addresses[pc]]-48);
+    acc = acc / (RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48);
 
     if(acc < 0)
         fs |= sf;
@@ -286,7 +286,7 @@ void Cpu::OP_DIVI()
 void Cpu::OP_DIVR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         acc /= xReg;
@@ -304,7 +304,7 @@ void Cpu::OP_JZ()
     pc++;
     if(zf)
     {
-        uint8_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
         pc += offset;
     }
@@ -319,7 +319,7 @@ void Cpu::OP_JNZ()
     pc++;
     if(!zf)
     {
-        uint8_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
         pc += offset;
     }
@@ -334,7 +334,7 @@ void Cpu::OP_JL()
     pc++;
     if(sf)
     {
-        uint8_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
         pc += offset;
     }
@@ -349,7 +349,7 @@ void Cpu::OP_JLE()
     pc++;
     if(sf || zf)
     {
-        uint8_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
         pc += offset;
     }
@@ -364,7 +364,7 @@ void Cpu::OP_JG()
     pc++;
     if(!sf)
     {
-        uint8_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
         pc += offset;
     }
@@ -380,7 +380,7 @@ void Cpu::OP_JGE()
     if(!sf || zf)
     {
         //TODO: Add a check for overflow.
-        uint8_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
         pc += offset;
     }
@@ -393,7 +393,7 @@ void Cpu::OP_JGE()
 void Cpu::OP_JMP()
 {
     pc++;
-    uint8_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
     pc += offset;
 }
@@ -401,8 +401,8 @@ void Cpu::OP_JMP()
 void Cpu::OP_MOD()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
-    acc = acc / RAM[addr];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+    acc = acc / RAM[memcontroller.ConvertToPhysAddress(addr)];
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
@@ -413,7 +413,8 @@ void Cpu::OP_MOD()
 void Cpu::OP_PUSH()
 {
     pc++;
-    addr = sp;
+    int a = memcontroller.ConvertToPhysAddress(sp);
+    addr = a;
     RAM[addr] = acc;
     sp -= 1;
 }
@@ -423,7 +424,7 @@ void Cpu::OP_POP()
     pc++;
     sp++;
     addr = sp;
-    acc = RAM[addr];
+    acc = RAM[memcontroller.ConvertToPhysAddress(addr)];
 }
 
 void Cpu::OP_INC()
@@ -454,7 +455,7 @@ void Cpu::OP_INT()
 void Cpu::OP_ANDA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc = acc & RAM[addr];
     if(acc < 0)
         fs |= sf;
@@ -466,7 +467,7 @@ void Cpu::OP_ANDA()
 void Cpu::OP_ANDI()
 {
     pc++;
-    acc = acc & RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    acc = acc & RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
@@ -477,7 +478,7 @@ void Cpu::OP_ANDI()
 void Cpu::OP_ANDR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         xReg &= acc;
@@ -494,7 +495,7 @@ void Cpu::OP_ANDR()
 void Cpu::OP_ORA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc = acc | RAM[addr];
     if(acc < 0)
         fs |= sf;
@@ -506,7 +507,7 @@ void Cpu::OP_ORA()
 void Cpu::OP_ORI()
 {
     pc++;
-    acc = acc | RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    acc = acc | RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
@@ -517,7 +518,7 @@ void Cpu::OP_ORI()
 void Cpu::OP_ORR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         xReg |= acc;
@@ -534,7 +535,7 @@ void Cpu::OP_ORR()
 void Cpu::OP_XORA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc = acc ^ RAM[addr];
     if(acc < 0)
         fs |= sf;
@@ -546,7 +547,7 @@ void Cpu::OP_XORA()
 void Cpu::OP_XORI()
 {
     pc++;
-    acc = acc ^ RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    acc = acc ^ RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
@@ -557,7 +558,7 @@ void Cpu::OP_XORI()
 void Cpu::OP_XORR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
         xReg ^= acc;
@@ -574,7 +575,7 @@ void Cpu::OP_XORR()
 void Cpu::OP_CMPA()
 {
     pc++;
-    addr = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     uint16_t val = RAM[addr];
     
     if(acc < val)
@@ -587,7 +588,7 @@ void Cpu::OP_CMPA()
 void Cpu::OP_CMPI()
 {
     pc++;
-    uint16_t val = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    uint16_t val = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     
     if(acc < val)
         fs |= lf;
@@ -599,7 +600,7 @@ void Cpu::OP_CMPI()
 void Cpu::OP_CMPR()
 {
     pc++;
-    char c = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     uint16_t val;
     
     if(c == 'x')
@@ -618,7 +619,7 @@ void Cpu::OP_CALL()
 {
     pc++;
     //TODO: add overflow check
-    uint16_t offset = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    uint16_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
     pc += offset;
 }
@@ -626,29 +627,29 @@ void Cpu::OP_CALL()
 void Cpu::OP_SHR()
 {
     pc++;
-    acc >> RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    acc >> RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
 }
 
 void Cpu::OP_SHL()
 {
     pc++;
-    acc << RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    acc << RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
 }
 
 void Cpu::OP_VAR()
 {
     pc++;
-    int x = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    int x = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     if(memcontroller.CheckIfVarExists(activeProgram, x))
     {
-        std::cout << "CRASH!!! Such variable already exists! " << char(x) << std::endl;
+        std::cout << "CRASH!!! Such variable already exists! " << char(x) << "(" << x << ")OP_VAR" << std::endl;
         throw new std::runtime_error("Such variable already exists");
     }
     int varAddr = activeProgram.dataSegment.writePointer;
-    RAM[varAddr] = RAM[activeProgram.codeSegment.memory.addresses[pc]];
-    RAM[varAddr+1] = RAM[activeProgram.codeSegment.memory.addresses[pc]];
+    RAM[varAddr] = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+    RAM[varAddr+1] = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
     activeProgram.dataSegment.writePointer += 2; 
 }
@@ -670,7 +671,7 @@ void Cpu::OP_LOADP()
 void Cpu::OP_LOADV()
 {
     pc++;
-    int addr = memcontroller.FindVarAddress(activeProgram, RAM[activeProgram.codeSegment.memory.addresses[pc]]);
+    int addr = memcontroller.FindVarAddress(activeProgram, RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]);
     acc = RAM[addr+1];
     pc++;
 }
@@ -678,7 +679,7 @@ void Cpu::OP_LOADV()
 void Cpu::OP_STOREV()
 {
     pc++;
-    int addr = memcontroller.FindVarAddress(activeProgram, RAM[activeProgram.codeSegment.memory.addresses[pc]]);
+    int addr = memcontroller.FindVarAddress(activeProgram, RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]);
     RAM[addr+1] = acc;
     pc++;
 }
@@ -699,7 +700,7 @@ void Cpu::UNDEFINED()
 // get the next instruction
 void Cpu::Fetch()
 {
-    int nextAddr = activeProgram.codeSegment.memory.addresses[pc];
+    int nextAddr = memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc]);
     ir = RAM[nextAddr];
     //printf("instruction-> %d\n", ir); // printing to make better understanding of what's going on
 }
@@ -875,35 +876,34 @@ void Cpu::Decode()
 
 void Cpu::ShowRam()
 {
-    printf("CODE: (starting from %d)\n", activeProgram.codeSegment.memory.addresses[0]);
+    printf("CODE: (starting from %d)\n", memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[0]));
     printf("[");
     for(int i = 0; i < 100; i++)
     {
-        printf("%d, ", RAM[activeProgram.codeSegment.memory.addresses[i]]);
+        printf("%d, ", RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[i])]);
     }
     printf("]\n");
 
-    printf("STACK: (starting from %d)\n", activeProgram.stackSegment.memory.addresses[0]);
+    printf("STACK: (starting from %d)\n", memcontroller.ConvertToPhysAddress(activeProgram.stackSegment.memory.addresses[activeProgram.stackSegment.memory.addresses.size()-1]));
     printf("[");
-    for(int i = 0; i < 100; i++)
+    for(int i = activeProgram.stackSegment.memory.addresses.size(); 
+    i > activeProgram.stackSegment.memory.addresses.size() - 100; i--)
     {
-        printf("%d, ", RAM[activeProgram.stackSegment.memory.addresses[i]]);
+        printf("%d, ", RAM[memcontroller.ConvertToPhysAddress(activeProgram.stackSegment.memory.addresses[i])]);
     }
     printf("]\n");
 
-    printf("DATA:(starting from %d)\n", activeProgram.dataSegment.memory.addresses[0]);
+    printf("DATA:(starting from %d)\n", memcontroller.ConvertToPhysAddress(activeProgram.dataSegment.memory.addresses[0]));
     printf("[");
     for(int i = 0; i < 100; i++)
     {
-        printf("%d, ", RAM[activeProgram.dataSegment.memory.addresses[i]]);
+        printf("%d, ", RAM[memcontroller.ConvertToPhysAddress(activeProgram.dataSegment.memory.addresses[i])]);
     }
     printf("]\n");
 }
 
 Program Cpu::LoadProgram(std::string filename)
 { 
-    //TODO: Rework program loading so it handles virtual memory correctly
-    //For now we do not allow to have programs bigger than our RAM
     std::vector<int> machineCode;
     std::stringstream tempStream;
     std::ifstream ifile(filename);
@@ -933,38 +933,50 @@ Program Cpu::LoadProgram(std::string filename)
     }
     
     // Machine code is loaded to the list, now we load this code into RAM
-    activeProgram.codeSegment = memcontroller.InitSegment(0, activeProgram);
-    activeProgram.dataSegment = memcontroller.InitSegment(0, activeProgram);
-    activeProgram.stackSegment = memcontroller.InitSegment(1, activeProgram);
+    
+    codeSegment = memcontroller.InitSegment(0);
+    dataSegment = memcontroller.InitSegment(0);
+    stackSegment = memcontroller.InitSegment(1);
+    std::vector<int> pagesToIgnore;
 
     for(int i = 0; i < machineCode.size(); i++){
-        if(i >= activeProgram.codeSegment.memory.addresses.size())
+        if(i >= codeSegment.memory.addresses.size())
         {
-            Memory newmem = memcontroller.AllocateMemory(machineCode.size() - activeProgram.codeSegment.memory.addresses.size());
-            activeProgram.codeSegment.memory.usedPages.insert(activeProgram.codeSegment.memory.usedPages.end(),
+            pagesToIgnore.insert(pagesToIgnore.end(), dataSegment.memory.usedPages.begin(),
+            dataSegment.memory.usedPages.end());
+
+            pagesToIgnore.insert(pagesToIgnore.end(), codeSegment.memory.usedPages.begin(),
+            codeSegment.memory.usedPages.end());
+
+            pagesToIgnore.insert(pagesToIgnore.end(), stackSegment.memory.usedPages.begin(),
+            stackSegment.memory.usedPages.end());
+
+            Memory newmem = memcontroller.AllocateMemory(machineCode.size() - codeSegment.memory.addresses.size(), pagesToIgnore);
+
+            codeSegment.memory.usedPages.insert(codeSegment.memory.usedPages.end(),
             newmem.usedPages.begin(), newmem.usedPages.end());
             
-            activeProgram.codeSegment.memory.addresses.insert(activeProgram.codeSegment.memory.addresses.end(),
+            codeSegment.memory.addresses.insert(codeSegment.memory.addresses.end(),
             newmem.addresses.begin(), newmem.addresses.end());
         }
-        memcontroller.WriteSegment(activeProgram.codeSegment, activeProgram.codeSegment.memory.addresses[i], machineCode[i]);
+        memcontroller.WriteSegment(codeSegment, codeSegment.memory.addresses[i], machineCode[i]);
     }
 
-    // Map system registers to segments
-    sp = stackSegment.startPointer+PAGE_SIZE-1;
+    sp = stackSegment.startPointer + PAGE_SIZE-1;
     pc = 0;
 
-    activeProgram.cpuSnapshot = SaveToSnapshot();
+    activeProgram = {dataSegment, codeSegment, stackSegment, {pc, 0, 0, 0, sp, 0, 0}};
 
     return activeProgram;
 }
 
 void Cpu::ExecuteProgram(Program program, int cycles)
 {
-    SetFromSnapshot(program.cpuSnapshot);
-    activeProgram = program;
     int c = 0;
-    cycles = 148000; //TODO: remove later!
+    SetFromSnapshot(program.cpuSnapshot);
+    activeProgram = memcontroller.PrepareProgramMemory(program);
+    sp = activeProgram.stackSegment.memory.addresses[activeProgram.stackSegment.memory.addresses.size()-1];
+    
     while(c < cycles && (fs & ef) == 0)
     {
         try
@@ -979,6 +991,12 @@ void Cpu::ExecuteProgram(Program program, int cycles)
         c++;
     }
     program.cpuSnapshot = SaveToSnapshot();
+    if(!((fs & ef) == 0))
+    {
+        memcontroller.FreeMemory(activeProgram.codeSegment.memory);
+        memcontroller.FreeMemory(activeProgram.stackSegment.memory);
+        memcontroller.FreeMemory(activeProgram.dataSegment.memory);
+    }
 }
 
 CpuSnapshot Cpu::SaveToSnapshot()
