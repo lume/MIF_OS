@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <iostream>
 
-Memory Memcontrol::AllocateMemory(uint16_t size)
+Memory Memcontrol::AllocateMemory(uint16_t size, std::vector<int> pagesToIgnore)
 {
     std::vector<int> memPageNumbers;
     int pageCount = 0;
@@ -12,31 +12,44 @@ Memory Memcontrol::AllocateMemory(uint16_t size)
     else
         pageCount = size/PAGE_SIZE + 1;
 
-
-
     for(int i = 0; i < PAGETABLE_SIZE; i++)
     {
         if(memPageNumbers.size() == pageCount)
             continue;
-        else if(!pageTable[i].used && pageTable[i].frame < 256)
+        else if(!pageTable[i].used && !pageTable[i].onDisk && pageTable[i].frame != -1) 
         {
-            pageTable[i].used = true;
             memPageNumbers.push_back(i);
+            pageTable[i].used = true;
         }
     }
 
-    for(int i = 0; i < pageCount - memPageNumbers.size(); i++)
+    int collectedPageListSize = memPageNumbers.size();
+    
+    for(int i = 0; i < pageCount - collectedPageListSize; i++)
     {
-        int leastAccessed = FindLeastAccessedPage();
-        MoveToSwap(leastAccessed);
-        memPageNumbers.push_back(leastAccessed);
-        pageTable[leastAccessed].used = true;
+        int leastAccessed = 0;
+        int ptSize = PAGETABLE_SIZE;
+        leastAccessed = FindLeastAccessedPage(pagesToIgnore);
+
+        if(leastAccessed > ptSize || leastAccessed == -1)
+        {
+            throw new std::runtime_error("Out of memory :(");
+        }
+        
+        int newPage = MoveToSwap(leastAccessed);
+        if(newPage == -1 || pageTable[newPage].frame == -1)
+            throw new std::runtime_error("Out of memory :("); // If we can't find memory to swap too, it means we are out of memory
+        
+        memPageNumbers.push_back(newPage);
+        pageTable[newPage].used = true;
     }
 
-    if(memPageNumbers.size() != pageCount)
-        throw new std::runtime_error("Out of memory :("); // If we can't find memory to swap too, it means we are out of memory
-    else
-        return {memPageNumbers, GetAddressList(memPageNumbers)};
+    for(int i : memPageNumbers)
+    {
+        ClearPageBeforeUse(i);
+    }
+
+    return {memPageNumbers, GetAddressList(memPageNumbers)};
 }
 
 void Memcontrol::FreeMemory(Memory mem)
@@ -44,33 +57,34 @@ void Memcontrol::FreeMemory(Memory mem)
     for(auto &page : mem.usedPages)
     {
         pageTable[page].used = false;
+    
     }
 }
 
-int Memcontrol::FindLeastAccessedPage()
+int Memcontrol::FindLeastAccessedPage(std::vector<int> collectedPages)
 {
-    int leastAccessed = 999;
+    int leastAccessed = std::numeric_limits<int>::max();
+    int page = -1;
     for(int i = 0; i < PAGETABLE_SIZE; i++)
     {
-        if(leastAccessed > pageTable[i].timesAccessed && pageTable[i].used == false)
+        if(leastAccessed > pageTable[i].timesAccessed && !pageTable[i].onDisk && 
+        pageTable[i].frame != -1 &&
+        (std::find(collectedPages.begin(), collectedPages.end(), i) == collectedPages.end()))
+        {
             leastAccessed = pageTable[i].timesAccessed;
+            if(pageTable[i].frame == -1)
+                throw;
+            page = i;
+        }
     }
-    if(leastAccessed > PAGETABLE_SIZE + FRAMETABLE_SIZE)
-        throw new std::runtime_error("Out of memory :(");
-    else
-        return leastAccessed;
+ 
+    return page;
 }
 
 void Memcontrol::WriteRAM(int address, int value)
 {
     //TODO: Add memory safety (check if address is in bounds of the page)
-    int pageNumber = address & 0b111111111100000000000;
-    pageNumber = pageNumber >> 12;
-    int offset = address &0b000000000011111111111;
-    int frameNumber = pageTable[pageNumber].frame;
-    int physAddress = frameNumber * 4096 + offset;
-
-    pageTable[pageNumber].timesAccessed++;
+    int physAddress = ConvertToPhysAddress(address);
 
     RAM[physAddress] = value;
 }
@@ -78,37 +92,62 @@ void Memcontrol::WriteRAM(int address, int value)
 uint16_t Memcontrol::ReadRAM(int address)
 {
     //TODO: Add memory safety (check if address is in bounds of the page)
-    int pageNumber = address & 0b111111111100000000000;
-    pageNumber = pageNumber >> 12;
-    int offset = address & 0b000000000011111111111;
-    int frameNumber = pageTable[pageNumber].frame;
-    int physAddress = frameNumber * 4096 + offset;
-
-    pageTable[pageNumber].timesAccessed++;
+    int physAddress = ConvertToPhysAddress(address);
 
     return RAM[physAddress];
 }
 
-void Memcontrol::MoveToSwap(int pageNumber)
+int Memcontrol::MoveToSwap(int pageNumber)
 {
     std::array<int, PAGE_SIZE> pageData;
     int memStart = pageTable[pageNumber].frame * PAGE_SIZE;
-
+   
     for(int i = 0; i < PAGE_SIZE; i++)
     {
-        pageData[i] = memStart+i;
+        if((memStart+i) > RAM.size())
+        {    
+            throw new std::runtime_error("Invalid memory access!");
+        }
+        pageData[i] = RAM[memStart+i];
     }
 
-    iocontroller.WriteSwapData(pageNumber, pageData);
+    int foundSector = -1;
+    int foundNewPage = -1;
+    for(int i = 0; i < PAGETABLE_SIZE; i++)
+    {
+        if(!pageTable[i].used && !pageTable[i].onDisk && i != pageNumber && pageTable[i].swapSector != -1)
+        {
+            foundSector = pageTable[i].swapSector;
+            foundNewPage = i;
+            break;
+        }
+    }
+
+    if(foundSector == -1)
+    {
+        return -1;
+    }
+    else
+    {
+        pageTable[pageNumber].swapSector = foundSector;
+        iocontroller.WriteSwapData(foundSector, pageData);
+
+        pageTable[foundNewPage].onDisk = false;
+        pageTable[foundNewPage].swapSector = -1;
+        pageTable[foundNewPage].used = false;
+        pageTable[foundNewPage].frame = pageTable[pageNumber].frame;
+
+        pageTable[pageNumber].used = false;
+        pageTable[pageNumber].frame = -1;
+        pageTable[pageNumber].onDisk = true;
+        return foundNewPage;
+    }
 }
 
-void Memcontrol::GetFromSwap(int pageNumber)
+std::array<int, PAGE_SIZE> Memcontrol::GetFromSwap(int pageNumber)
 {
-    std::array<int, PAGE_SIZE> data = iocontroller.ReadSwapData(pageNumber+256);
-    for(int i = 0; i < PAGE_SIZE; i++)
-    {
-        RAM[pageTable[pageNumber].frame+i] = data[i];
-    }
+    std::array<int, PAGE_SIZE> data = iocontroller.ReadSwapData(pageTable[pageNumber].swapSector);
+    return data;
 }
 
 void Memcontrol::WriteSegment(Segment segment, int address, int value)
@@ -127,16 +166,23 @@ uint16_t Memcontrol::ReadSegment(Segment segment, int address){
     return 0;
 }
 
-Segment Memcontrol::InitSegment(int direction)
+Segment Memcontrol::InitSegment(int direction, int pageCount)
 {
     Segment segment;
     int pageNumber;
     
+    std::vector<int> pagesToIgnore;
+
     segment.direction = direction;
-    segment.memory = AllocateMemory(1<<12);
+
+    segment.memory = AllocateMemory(PAGE_SIZE * pageCount);
+
     pageNumber = segment.memory.usedPages[0];
-    segment.writePointer = (pageNumber << 12) & 0b11111111100000000000;
-    segment.startPointer = (pageNumber << 12) & 0b11111111100000000000;
+    //segment.writePointer = (pageNumber << 12) & 0b11111111100000000000;
+    //segment.startPointer = (pageNumber << 12) & 0b11111111100000000000;
+    segment.writePointer = pageTable[pageNumber].frame * PAGE_SIZE;
+    segment.startPointer = pageTable[pageNumber].frame * PAGE_SIZE;
+
     return segment;
 }
 
@@ -166,6 +212,13 @@ Memcontrol::Memcontrol()
         pageTable[i].frame = i;
         pageTable[i].timesAccessed = 0;
         pageTable[i].used = false;
+        pageTable[i].onDisk = false;
+        pageTable[i].swapSector = -1;
+        if(i >= FRAMETABLE_SIZE)
+        {
+            pageTable[i].swapSector = i - FRAMETABLE_SIZE;
+            pageTable[i].frame = -1;
+        }
     }
 }
 
@@ -177,7 +230,7 @@ int Memcontrol::FindPtrAddress()
 int Memcontrol::FindVarAddress(Program program, int var)
 {
     int startAddress = program.dataSegment.startPointer;
-    for(int i = 0; i < 4096; i+=2)
+    for(int i = 0; i < program.dataSegment.memory.addresses.size(); i+=2)
     {
         int p = RAM[startAddress+i];
         if(p == var)
@@ -191,8 +244,8 @@ int Memcontrol::FindVarAddress(Program program, int var)
 
 bool Memcontrol::CheckIfVarExists(Program program, int var)
 {
-    int startAddress = program.dataSegment.startPointer;
-    for(int i = 0; i < 4096; i+=2)
+    int startAddress = ConvertToPhysAddress(program.dataSegment.startPointer);
+    for(int i = 0; i < program.dataSegment.memory.addresses.size(); i+=2)
     {
         if(RAM[startAddress+i] == var)
         {
@@ -201,3 +254,138 @@ bool Memcontrol::CheckIfVarExists(Program program, int var)
     }
     return false;
 }  
+
+Program Memcontrol::PrepareProgramMemory(Program program)
+{
+    std::vector<int> pagesToIgnore;
+    pagesToIgnore.insert(pagesToIgnore.end(),
+    program.codeSegment.memory.usedPages.begin(),
+    program.codeSegment.memory.usedPages.end());
+    
+    pagesToIgnore.insert(pagesToIgnore.end(),
+    program.stackSegment.memory.usedPages.begin(),
+    program.stackSegment.memory.usedPages.end());
+
+    pagesToIgnore.insert(pagesToIgnore.end(),
+    program.dataSegment.memory.usedPages.begin(),
+    program.dataSegment.memory.usedPages.end());
+
+    for(auto i : program.codeSegment.memory.usedPages)
+    {
+        if(pageTable[i].onDisk || pageTable[i].frame == -1)
+        {
+            int lu = FindLeastAccessedPage(pagesToIgnore);
+            int newPage = MoveToSwap(lu);
+            std::array<int, PAGE_SIZE> data = GetFromSwap(i);
+            pageTable[newPage].swapSector = pageTable[i].swapSector;
+            pageTable[newPage].onDisk = true;
+            pageTable[i].onDisk = false;
+            pageTable[i].used = true;
+            pageTable[newPage].used = false;
+            pageTable[i].frame = pageTable[newPage].frame;
+            pageTable[i].swapSector = -1;
+            pageTable[newPage].frame = -1;
+            for(int j = 0; j < PAGE_SIZE; j++)
+            {
+                int addr = pageTable[i].frame * PAGE_SIZE;
+                RAM[addr + j] = data[j];
+            }
+        }
+    }
+
+    for(auto i : program.stackSegment.memory.usedPages)
+    {
+        if(pageTable[i].onDisk || pageTable[i].frame == -1)
+        {
+            int lu = FindLeastAccessedPage(pagesToIgnore);
+            int newPage = MoveToSwap(lu);
+            std::array<int, PAGE_SIZE> data = GetFromSwap(i);
+            pageTable[newPage].swapSector = pageTable[i].swapSector;
+            pageTable[newPage].onDisk = true;
+            pageTable[i].onDisk = false;
+            pageTable[i].used = true;
+            pageTable[newPage].used = false;
+            pageTable[i].frame = pageTable[newPage].frame;
+            pageTable[i].swapSector = -1;
+            pageTable[newPage].frame = -1;
+            for(int j = 0; j < PAGE_SIZE; j++)
+            {
+                int addr = pageTable[i].frame * PAGE_SIZE;
+                RAM[addr + j] = data[j];
+            }
+        }
+    }
+
+    for(auto i : program.dataSegment.memory.usedPages)
+    {
+        if(pageTable[i].onDisk || pageTable[i].frame == -1)
+        {
+            int lu = FindLeastAccessedPage(pagesToIgnore);
+            int newPage = MoveToSwap(lu);
+            std::array<int, PAGE_SIZE> data = GetFromSwap(i);
+            pageTable[newPage].swapSector = pageTable[i].swapSector;
+            pageTable[newPage].onDisk = true;
+            pageTable[i].onDisk = false;
+            pageTable[i].used = true;
+            pageTable[newPage].used = false;
+            pageTable[i].frame = pageTable[newPage].frame;
+            pageTable[i].swapSector = -1;
+            pageTable[newPage].frame = -1;
+            for(int j = 0; j < PAGE_SIZE; j++)
+            {
+                int addr = pageTable[i].frame * PAGE_SIZE;
+                RAM[addr + j] = data[j];
+            }
+        }
+    }
+
+    program.codeSegment.memory.addresses = GetAddressList(program.codeSegment.memory.usedPages);
+    program.stackSegment.memory.addresses = GetAddressList(program.stackSegment.memory.usedPages);
+    program.dataSegment.memory.addresses = GetAddressList(program.dataSegment.memory.usedPages);
+
+    program.codeSegment.startPointer = program.codeSegment.memory.addresses[0];
+    program.stackSegment.startPointer = program.stackSegment.memory.addresses[program.stackSegment.memory.addresses.size()-1];
+    program.dataSegment.startPointer = program.dataSegment.memory.addresses[0];
+   
+    program.codeSegment.writePointer = program.codeSegment.memory.addresses[0];
+    program.stackSegment.writePointer = program.stackSegment.memory.addresses[program.stackSegment.memory.addresses.size()-1];
+    program.dataSegment.writePointer = program.dataSegment.memory.addresses[0];
+
+    return program;
+}
+
+
+int Memcontrol::ConvertToPhysAddress(int addr)
+{
+    int pageNumber = addr & 0b111111111100000000000;
+    pageNumber = pageNumber >> 12;
+    int offset = addr - PAGE_SIZE*pageNumber;
+    int frameNumber = pageTable[pageNumber].frame;
+
+    if(pageTable[pageNumber].onDisk)
+    {
+        throw new std::runtime_error("Unhandled page fault");
+    }
+
+    int physAddress = frameNumber * PAGE_SIZE + offset;
+
+    pageTable[pageNumber].timesAccessed++;
+    pageTable[pageNumber].used = true;
+    
+    return physAddress;
+}
+
+void Memcontrol::ClearPageBeforeUse(int page)
+{
+    std::vector<int> temp;
+    temp.push_back(page);
+    std::vector<int> addresses;
+
+    addresses = GetAddressList(temp);
+
+    int startAddr = pageTable[page].frame;
+    for(int i = 0; i < addresses.size(); i++)
+    {
+        RAM[ConvertToPhysAddress(addresses[i])] = 0;
+    }
+}

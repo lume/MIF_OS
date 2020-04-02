@@ -215,7 +215,11 @@ std::vector<int> CompileToMemory(char* sourceFile)
 void CompileToFile(char* sourceFile, std::string output)
 {
     std::vector<int> machineCode = CompileToMemory(sourceFile);
-
+    if(machineCode[machineCode.size()-1] != 0)
+    {
+        std::cout << "\nThe program has no stop at the end! compilation failed\n" << std::endl;
+        exit(-1);
+    } 
     std::ofstream ofile(output);
 
     std::stringstream machineCodeString;
@@ -328,6 +332,10 @@ void ParseMnemo(char* mnemo, char* line)
         {
             //since atoi means UB, we need to double check apparently :/
             t = (int)arg[0];
+            if(t >= 48 && t <= 57)
+            {
+                t -= 48;
+            }
         }
         code.insert(code.end(), t);
     }

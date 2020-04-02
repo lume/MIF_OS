@@ -5,10 +5,29 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(gdb) Launch Tesst",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/rmTests",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "(gdb) Launch linux",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/RM/rmDebug",
+            "program": "${workspaceFolder}/rmDebug",
             "args": ["test"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

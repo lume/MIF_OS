@@ -8,27 +8,28 @@
 class Cpu
 {
     public:
+        Memcontrol memcontroller = Memcontrol();
+
         Cpu(){}
         void ShowRam(); // Show the contents of the RAM
         Program LoadProgram(std::string filename);// Load the Program machine code to the memory
-        void ExecuteProgram(Program program, int cycles); // Execute the loaded program for some cycles
+        void ExecuteProgram(Program program, int cycles = 14800); // Execute the loaded program for some cycles
         CpuSnapshot SaveToSnapshot();
         void SetFromSnapshot(CpuSnapshot snapshot);
 
     private:
-        Memcontrol memcontroller = Memcontrol();
 
         Program activeProgram;
         
         // Register definition
-        uint16_t pc = 0x0;   // program counter
-        uint16_t addr = 0x0; // internal addr register
-        uint16_t acc = 0x0;   // accumulator
-        uint16_t ir = 0x0;   // instruction register
+        int pc = 0x0;   // program counter
+        int addr = 0x0; // internal addr register
+        int acc = 0x0;   // accumulator
+        int ir = 0x0;   // instruction register
         int sp = RAM_SIZE - 1; // stack pointer 
-        uint16_t fs = 0x0; // flags
-        uint16_t xReg = 0x0; // x register
-        uint16_t cReg = 0x0; // c register
+        int fs = 0x0; // flags
+        int xReg = 0x0; // x register
+        int cReg = 0x0; // c register
 
         //TODO: Add TLB
 
