@@ -343,13 +343,13 @@ Program Memcontrol::PrepareProgramMemory(Program program)
     program.stackSegment.memory.addresses = GetAddressList(program.stackSegment.memory.usedPages);
     program.dataSegment.memory.addresses = GetAddressList(program.dataSegment.memory.usedPages);
 
-    program.codeSegment.startPointer = program.codeSegment.memory.addresses[0];
+    /*program.codeSegment.startPointer = program.codeSegment.memory.addresses[0];
     program.stackSegment.startPointer = program.stackSegment.memory.addresses[program.stackSegment.memory.addresses.size()-1];
     program.dataSegment.startPointer = program.dataSegment.memory.addresses[0];
    
     program.codeSegment.writePointer = program.codeSegment.memory.addresses[0];
     program.stackSegment.writePointer = program.stackSegment.memory.addresses[program.stackSegment.memory.addresses.size()-1];
-    program.dataSegment.writePointer = program.dataSegment.memory.addresses[0];
+    program.dataSegment.writePointer = program.dataSegment.memory.addresses[0];*/
 
     return program;
 }

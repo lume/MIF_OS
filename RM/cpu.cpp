@@ -878,7 +878,7 @@ void Cpu::ShowRam()
 {
     printf("CODE: (starting from %d)\n", memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[0]));
     printf("[");
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < 50; i++)
     {
         printf("%d, ", RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[i])]);
     }
@@ -887,7 +887,7 @@ void Cpu::ShowRam()
     printf("STACK: (starting from %d)\n", memcontroller.ConvertToPhysAddress(activeProgram.stackSegment.memory.addresses[activeProgram.stackSegment.memory.addresses.size()-1]));
     printf("[");
     for(int i = activeProgram.stackSegment.memory.addresses.size(); 
-    i > activeProgram.stackSegment.memory.addresses.size() - 100; i--)
+    i > activeProgram.stackSegment.memory.addresses.size() - 50; i--)
     {
         printf("%d, ", RAM[memcontroller.ConvertToPhysAddress(activeProgram.stackSegment.memory.addresses[i])]);
     }
@@ -895,7 +895,7 @@ void Cpu::ShowRam()
 
     printf("DATA:(starting from %d)\n", memcontroller.ConvertToPhysAddress(activeProgram.dataSegment.memory.addresses[0]));
     printf("[");
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < 50; i++)
     {
         printf("%d, ", RAM[memcontroller.ConvertToPhysAddress(activeProgram.dataSegment.memory.addresses[i])]);
     }
@@ -970,7 +970,7 @@ Program Cpu::LoadProgram(std::string filename)
     return activeProgram;
 }
 
-void Cpu::ExecuteProgram(Program program, int cycles)
+Program Cpu::ExecuteProgram(Program program, int cycles)
 {
     int c = 0;
     SetFromSnapshot(program.cpuSnapshot);
@@ -990,13 +990,15 @@ void Cpu::ExecuteProgram(Program program, int cycles)
         }
         c++;
     }
-    program.cpuSnapshot = SaveToSnapshot();
+    activeProgram.cpuSnapshot = SaveToSnapshot();
     if(!((fs & ef) == 0))
     {
         memcontroller.FreeMemory(activeProgram.codeSegment.memory);
         memcontroller.FreeMemory(activeProgram.stackSegment.memory);
         memcontroller.FreeMemory(activeProgram.dataSegment.memory);
     }
+
+    return activeProgram;
 }
 
 CpuSnapshot Cpu::SaveToSnapshot()

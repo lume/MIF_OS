@@ -1,31 +1,55 @@
 #include "Clock.h"
 #include <iostream>
+#include <pthread.h>
 
-Clock::Clock()
+Clock::Clock(Cpu cpu, bool step)
 {
     isOn = true;
-
-    cpu = Cpu();
+    this->cpu = cpu;
     memcontrol = Memcontrol();
     iocontrol = IOControl();
+    this->step = step;
 }
 
 void Clock::Update()
 {
-    while(isOn)
+    if(this->step)
     {
-        //Run a program for 100 cycles and stop
-        cpu.ShowRam();
-        cpu.ExecuteProgram(activeProgram, 100);
-        cpu.ShowRam();
-        isOn = false;
+        while(isOn)
+        {
+            activeProgram = cpu.ExecuteProgram(activeProgram, 1);
+            this->ui.Update();
+            if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
+            {
+                std::cout << "Program has finished!";
+                isOn = false;
+            }
+        }
+        this->ui.Update();
+    }
+    else
+    {
+        this->ui.Update();
+        while(isOn)
+        {
+            activeProgram = cpu.ExecuteProgram(activeProgram, 1);
+            if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
+            {
+                std::cout << "Program has finished!";
+
+                isOn = false;
+            }
+        }
+        this->ui.Update();
     }
 }
 
-void Clock::Start()
+void Clock::Start(std::string programName, UI ui)
 {
     InitSwapDisk();
-    activeProgram = cpu.LoadProgram("out.txt"); 
+    this->ui = ui;
+    activeProgram = cpu.LoadProgram(programName); 
+    this->ui.cpu = cpu;
 }
 
 void Clock::InitSwapDisk()
