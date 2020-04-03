@@ -18,6 +18,7 @@ void Clock::Update()
         while(isOn)
         {
             activeProgram = cpu.ExecuteProgram(activeProgram, 1);
+            this->ui.cpu = cpu;
             this->ui.Update();
             if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
             {
@@ -33,6 +34,8 @@ void Clock::Update()
         while(isOn)
         {
             activeProgram = cpu.ExecuteProgram(activeProgram, 1);
+            this->ui.cpu = cpu;
+
             if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
             {
                 std::cout << "Program has finished!";

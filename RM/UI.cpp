@@ -35,4 +35,6 @@ void UI::Update()
 
     std::cout << "RAM: ";
     this->cpu.ShowRam();
+    printf("instruction-> %d\n", snap.ir); 
+    
 }

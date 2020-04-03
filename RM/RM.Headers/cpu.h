@@ -3,7 +3,6 @@
 #include <array>
 #include "memcontrol.h"
 
-//TODO: implement data segment operations
 
 class Cpu
 {
@@ -29,7 +28,6 @@ class Cpu
         int xReg = 0x0; // x register
         int cReg = 0x0; // c register
 
-        //TODO: Add TLB
 
         void Fetch();
         void Decode();
@@ -60,7 +58,6 @@ class Cpu
         void OP_MULI(); // multiply accumulator by immediate
         void OP_MULR(); // multiply accumulator by value at register
 
-        // Divs. After dot value stored in cReg // TODO: figure out after dot values are called 
         void OP_DIVA(); // divide accumulator by value at address
         void OP_DIVI(); // divide accumulator by immediate
         void OP_DIVR(); // divide accumulator by value at register

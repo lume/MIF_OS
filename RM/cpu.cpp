@@ -13,7 +13,6 @@
 
 //#define RAM memcontroller.RAM
 
-//TODO: encapsulate RAM read/write operations 
 
 // Flag definition
 enum
@@ -101,7 +100,7 @@ void Cpu::OP_LOADI()
     acc = varVal;
     pc++;
 }
-//TODO: Convert RM into VM addresses
+
 void Cpu::OP_LOADR()
 {
     pc++;
@@ -379,7 +378,6 @@ void Cpu::OP_JGE()
     pc++;
     if(!sf || zf)
     {
-        //TODO: Add a check for overflow.
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
         pc += offset;
@@ -449,7 +447,6 @@ void Cpu::OP_DEC()
 
 void Cpu::OP_INT()
 {
-   //TODO: implement interrupts
 }
 
 void Cpu::OP_ANDA()
@@ -618,7 +615,6 @@ void Cpu::OP_CMPR()
 void Cpu::OP_CALL()
 {
     pc++;
-    //TODO: add overflow check
     uint16_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
     pc += offset;
@@ -656,14 +652,12 @@ void Cpu::OP_VAR()
 
 void Cpu::OP_PTR()
 {
-    //TODO: Implement
     pc++;
     pc++;
 }
 
 void Cpu::OP_LOADP()
 {
-    //TODO: Implement
     pc++;
     pc++;
 }
@@ -686,7 +680,6 @@ void Cpu::OP_STOREV()
 
 void Cpu::OP_STOREP()
 {
-    //TODO: Implement
     pc++;
     pc++;    
 }
@@ -702,7 +695,6 @@ void Cpu::Fetch()
 {
     int nextAddr = memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc]);
     ir = RAM[nextAddr];
-    //printf("instruction-> %d\n", ir); // printing to make better understanding of what's going on
 }
 
 // decode the instruction 
