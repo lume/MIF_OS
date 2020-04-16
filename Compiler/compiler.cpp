@@ -183,7 +183,7 @@ std::vector<int> CompileToMemory(char* sourceFile)
         if(strcmp(nread, "") == 0 || strcmp(nread, "\n") == 0) 
             continue;
 
-        printf("\n%s\n", nread);
+        //printf("\n%s\n", nread);
         if(nread[strlen(nread)-1] == '\n')
         {
             nread[strlen(nread)-1] = '\0';
@@ -203,12 +203,12 @@ std::vector<int> CompileToMemory(char* sourceFile)
 
     // Closing operation
     fclose(stream);
-    printf("\n\nFinal compilation result: \n");
+   /* printf("\n\nFinal compilation result: \n");
     printf("[");
         std::for_each(code.begin(), code.end(),[](int i){
             printf("%d,", i);
         });
-    printf("]");
+    printf("]");*/
     return code;
 }
 
@@ -298,11 +298,11 @@ void ParseMnemo(char* mnemo, char* line)
                     code.insert(code.end(), undefLabel[i]);
                 }
 
-                printf("[");
+                /*printf("[");
                 std::for_each(code.begin(), code.end(),[](int i){
                     printf("%d,", i);
                 });
-                printf("]");
+                printf("]");*/
             }
             else
             {
@@ -341,11 +341,11 @@ void ParseMnemo(char* mnemo, char* line)
     }
     src_counter += opsize;
 
-     printf("[");
+    /* printf("[");
         std::for_each(code.begin(), code.end(),[](int i){
             printf("%d,", i);
         });
-    printf("]");
+    printf("]");*/
     return;
 }   
 
@@ -405,11 +405,11 @@ void compile_DATA(char* line)
             code.insert(code.end(), (int)paramToken[i] -0x30);
     }
 
-    printf("[");
+   /* printf("[");
     std::for_each(code.begin(), code.end(),[](int i){
         printf("%d,", i);
     });
-    printf("]");
+    printf("]");*/
 }
 
 void compile_MDATA(char* line)
