@@ -80,10 +80,7 @@ enum
     LOADV,
     LOADP,
     STOREP,
-    STOREV,
-    JO,
-    JC,
-    JP
+    STOREV
 };
 
 void Cpu::OP_STOP()
@@ -145,27 +142,22 @@ void Cpu::OP_ADDA()
 {
     pc++;
     addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-    acc = AddInternal(RAM[addr], acc);
+    acc += RAM[addr];
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
 void Cpu::OP_ADDI()
 {
     pc++;
-    acc = AddInternal(RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48, acc);
-    
+    acc += RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48;
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -175,16 +167,14 @@ void Cpu::OP_ADDR()
     char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
-        acc = AddInternal(xReg, acc);
+        acc += xReg;
     else if(c == 'c')
-        acc = AddInternal(cReg, acc);
+        acc += cReg;
 
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -197,8 +187,6 @@ void Cpu::OP_SUBA()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -211,8 +199,6 @@ void Cpu::OP_SUBI()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -230,8 +216,6 @@ void Cpu::OP_SUBR()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -239,28 +223,24 @@ void Cpu::OP_MULA()
 {
     pc++;
     addr = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-    acc = MulInternal(RAM[addr], acc);
+    acc *= RAM[addr];
 
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
 void Cpu::OP_MULI()
 {
     pc++;
-    acc = MulInternal(RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48, acc);
+    acc *= (RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])]-48);
     
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -270,16 +250,14 @@ void Cpu::OP_MULR()
     char c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
 
     if(c == 'x')
-        acc = MulInternal(xReg, acc);
+        acc *= xReg;
     else if(c == 'c')
-        acc = MulInternal(cReg, acc);
+        acc *= cReg;
     
     if(acc < 0)
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -292,8 +270,6 @@ void Cpu::OP_DIVA()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -306,8 +282,6 @@ void Cpu::OP_DIVI()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -324,8 +298,6 @@ void Cpu::OP_DIVR()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -509,8 +481,6 @@ void Cpu::OP_INC()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
 }
 
 void Cpu::OP_DEC()
@@ -521,8 +491,6 @@ void Cpu::OP_DEC()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
 }
 
 void Cpu::OP_INT()
@@ -538,8 +506,6 @@ void Cpu::OP_ANDA()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -551,8 +517,6 @@ void Cpu::OP_ANDI()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -570,8 +534,6 @@ void Cpu::OP_ANDR()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -584,8 +546,6 @@ void Cpu::OP_ORA()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -597,8 +557,6 @@ void Cpu::OP_ORI()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -616,8 +574,6 @@ void Cpu::OP_ORR()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -630,8 +586,6 @@ void Cpu::OP_XORA()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -643,8 +597,6 @@ void Cpu::OP_XORI()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -662,8 +614,6 @@ void Cpu::OP_XORR()
         fs |= sf;
     if(acc == 0)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -677,8 +627,6 @@ void Cpu::OP_CMPA()
         fs |= lf;
     if(acc == val)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -691,8 +639,6 @@ void Cpu::OP_CMPI()
         fs |= lf;
     if(acc == val)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -711,8 +657,6 @@ void Cpu::OP_CMPR()
         fs |= lf;
     if(acc == val)
         fs |= zf;
-    if(ParityCheck())
-        fs |= pf;
     pc++;
 }
 
@@ -962,15 +906,6 @@ void Cpu::Decode()
     case(STOREP):
         OP_STOREP();
         break;
-    case(JO):
-        OP_JO();
-        break;
-    case(JC):
-        OP_JC();
-        break;
-    case(JP):
-        OP_JP();
-        break;
     default:
         UNDEFINED();
         break;
@@ -1130,30 +1065,4 @@ void Cpu::SetFromSnapshot(CpuSnapshot snapshot)
     ir = snapshot.ir;
     pc = snapshot.pc;
     xReg = snapshot.xReg;
-}
-
-int Cpu::AddInternal(int x, int y)
-{
-    if(x + y > std::numeric_limits<int>::max())
-        fs |= of;
-    return x + y;
-}
-
-int Cpu::MulInternal(int x, int y)
-{
-    if(x * y > std::numeric_limits<int>::max())
-        fs |= of;
-    return x * y;
-}
-
-bool ParityCheck()
-{
-    bool parity = 0; 
-    int n = acc;
-    while (n) 
-    { 
-        parity = !parity; 
-        n     = n & (n - 1); 
-    }      
-    return parity; 
 }
