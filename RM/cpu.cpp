@@ -1146,7 +1146,7 @@ int Cpu::MulInternal(int x, int y)
     return x * y;
 }
 
-bool ParityCheck()
+bool Cpu::ParityCheck()
 {
     bool parity = 0; 
     int n = acc;
