@@ -84,6 +84,9 @@ std::string undefinedLabel(char* label);
 #define LOADP_OPC 49
 #define STOREP_OPC 50
 #define STOREV_OPC 51
+#define JO_OPC 52
+#define JC_OPC 53
+#define JP_OPC 54
 
 // Instruction sizes
 #define STOP_SIZE 1
@@ -111,6 +114,9 @@ std::string undefinedLabel(char* label);
 #define JG_SIZE 2
 #define JGE_SIZE 2
 #define JMP_SIZE 2
+#define JO_SIZE 2
+#define JP_SIZE 2
+#define JC_SIZE 2
 #define MOD_SIZE 2
 #define PUSH_SIZE 1
 #define POP_SIZE 1
@@ -144,11 +150,11 @@ const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "sto
 "suba", "subi", "subr", "mula", "muli", "mulr", "diva", "divi", "divr",
 "jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "mod", "push", "pop", "inc", "dec",
 "shl", "shr", "int", "anda", "andi", "andr", "ora", "ori", "orr", "xora", "xori", "xorr",
-"cmpa", "cmpi", "cmpr", "call", "var", "ptr"};
+"cmpa", "cmpi", "cmpr", "call", "var", "ptr", "jo", "jp", "jc"};
 
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
-const char* jumps[] = {"jz", "jnz", "jl", "jle", "jg", "jge", "jmp, call"};
+const char* jumps[] = {"jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "call", "jo", "jc", "jp"};
 int jmplen = sizeof(jumps)/sizeof(jumps[0]);
 
 // List of directives

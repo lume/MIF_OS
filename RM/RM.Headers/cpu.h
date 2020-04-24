@@ -70,6 +70,9 @@ class Cpu
         void OP_JG();
         void OP_JGE();
         void OP_JMP();
+        void OP_JP();
+        void OP_JC();
+        void OP_JO();
 
         void OP_MOD();
         void OP_PUSH();

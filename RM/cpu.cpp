@@ -17,10 +17,13 @@
 // Flag definition
 enum
 {
-    sf = 1 << 0,
-    zf = 1 << 1,
-    lf = 1 << 2,
-    ef = 1 << 3
+    sf = 1 << 0, // sign
+    zf = 1 << 1, // zero
+    lf = 1 << 2, // lower
+    ef = 1 << 3, // end
+    of = 1 << 4, // overflow
+    cf = 1 << 5, // carry
+    pf = 1 << 6  // parity
 };
 
 // Instruction definition
@@ -377,6 +380,51 @@ void Cpu::OP_JGE()
 {
     pc++;
     if(!sf || zf)
+    {
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+        pc++;
+        pc += offset;
+    }
+    else
+    {
+        pc++;
+    }
+}
+
+void Cpu::OP_JO()
+{
+    pc++;
+    if(of)
+    {
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+        pc++;
+        pc += offset;
+    }
+    else
+    {
+        pc++;
+    }
+}
+
+void Cpu::OP_JP()
+{
+    pc++;
+    if(pf)
+    {
+        uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+        pc++;
+        pc += offset;
+    }
+    else
+    {
+        pc++;
+    }
+}
+
+void Cpu::OP_JC()
+{
+    pc++;
+    if(cf)
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
