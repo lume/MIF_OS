@@ -4,7 +4,6 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "(gdb) Launch Tesst",
             "type": "cppdbg",
@@ -50,7 +49,7 @@
             "request": "launch",
             "program": "${workspaceFolder}\\Compiler\\compilerDebug.exe",
             "args": [
-                "${workspaceFolder}\\Compiler\\bigcodeTest.asm"
+                "${workspaceFolder}\\Compiler\\test2.asm"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
