@@ -117,4 +117,8 @@ class Cpu
         void OP_STOREV();
         void OP_LOADP();
         void OP_STOREP();
+
+        int AddInternal(int x, int y);
+        int MulInternal(int x, int y);
+        bool ParityCheck();
 };
