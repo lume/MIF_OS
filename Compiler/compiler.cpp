@@ -84,6 +84,9 @@ std::string undefinedLabel(char* label);
 #define LOADP_OPC 49
 #define STOREP_OPC 50
 #define STOREV_OPC 51
+#define JO_OPC 52
+#define JP_OPC 53
+#define JC_OPC 54
 
 // Instruction sizes
 #define STOP_SIZE 1
@@ -138,6 +141,9 @@ std::string undefinedLabel(char* label);
 #define LOADP_SIZE 2
 #define STOREP_SIZE 2
 #define STOREV_SIZE 2
+#define JO_SIZE 2
+#define JC_SIZE 2
+#define JP_SIZE 2
 
 // List of mnemonics
 const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "storea", "storer", "storev", "storep", "adda", "addi", "addr", 
@@ -148,7 +154,7 @@ const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "sto
 
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
-const char* jumps[] = {"jz", "jnz", "jl", "jle", "jg", "jge", "jmp, call"};
+const char* jumps[] = {"jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "call", "jo", "jp", "jc"};
 int jmplen = sizeof(jumps)/sizeof(jumps[0]);
 
 // List of directives
@@ -285,6 +291,9 @@ void ParseMnemo(char* mnemo, char* line)
             if(labels.find(jumpTarget) == labels.end())
             {
                 //not found
+                
+                labels.insert({jumpTarget, 0});
+
                 std::string undefLabel = undefinedLabel(jumpTarget);
                 std::cout << undefLabel << std::endl;
                 
@@ -293,10 +302,16 @@ void ParseMnemo(char* mnemo, char* line)
                 code.insert(code.end(), opcode);
 
                 //insert undefined label into code
-                for(int i = 0; i < undefLabel.length(); i++)
+                /*for(int i = 0; i < undefLabel.length(); i++)
                 {
                     code.insert(code.end(), undefLabel[i]);
-                }
+                }*/
+
+                std::stringstream str;
+                str << jumpTarget;
+                int val;
+                str >> std::hex >> val;
+                code.insert(code.end(), val);
 
                 /*printf("[");
                 std::for_each(code.begin(), code.end(),[](int i){
@@ -310,9 +325,10 @@ void ParseMnemo(char* mnemo, char* line)
                 int opcode = getOpcode(mnemToken);
                 code.insert(code.end(), opcode);
 
-                int counterDiff = labels.at(jumpTarget) - (src_counter + 2); // This line may throw an exception
+                /*int counterDiff = labels.at(jumpTarget) - (src_counter + 2); // This line may throw an exception
                 code.insert(code.end(), opcode);
-                code.insert(code.end(), counterDiff);
+                code.insert(code.end(), counterDiff);*/
+                code.insert(code.end(), labels[jumpTarget]);
             }
             int opsize = getOpSize(mnemToken);
             src_counter += opsize;
@@ -379,10 +395,29 @@ void compile_LABEL(char* line)
     {
         //not found, adding label to our label list
         labels.insert({paramToken, src_counter});
-
+        //code.insert(code.end(), src_counter);
         for(auto it = labels.cbegin(); it != labels.cend(); ++it)
         {
             std::cout << it->first << " " << it->second << std::endl; 
+        }
+    }
+    else if(labels[paramToken] == 0)
+    {
+        std::stringstream str;
+        str << paramToken;
+        int val;
+        str >> std::hex >> val;
+        std::vector<int> positionsToChange;
+        labels[paramToken] =  src_counter;
+        for(int i = 0; i < code.size(); i++)
+        {
+            if(code[i] == val)
+                positionsToChange.insert(positionsToChange.end(), i);
+        }
+
+        for(auto x : positionsToChange)
+        {
+            code[x] = labels[paramToken];
         }
     }
     else
@@ -531,6 +566,12 @@ int getOpcode(char* mnem)
         return VAR_OPC;
     if(strcmp(mnem, "ptr") == 0)
         return PTR_OPC;
+    if(strcmp(mnem, "jp") == 0)
+        return JP_OPC;
+    if(strcmp(mnem, "jo") == 0)
+        return JO_OPC;
+    if(strcmp(mnem, "jc") == 0)
+        return JC_OPC;
     return 999;
 }
 
@@ -578,6 +619,14 @@ int getOpSize(char* mnem)
         return JNZ_SIZE;
     if(strcmp(mnem, "jl") == 0)
         return JL_SIZE;
+    if(strcmp(mnem, "jz") == 0)
+        return JZ_SIZE;
+    if(strcmp(mnem, "jp") == 0)
+        return JP_SIZE;
+    if(strcmp(mnem, "jo") == 0)
+        return JO_SIZE;
+    if(strcmp(mnem, "jc") == 0)
+        return JC_SIZE;
     if(strcmp(mnem, "jle") == 0)
         return JLE_SIZE;
     if(strcmp(mnem, "jg") == 0)
