@@ -28,7 +28,27 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/rmDebug",
-            "args": ["small.txt"],
+            "args": ["out.txt"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+
+        {
+            "name": "(gdb) Launch linux comp",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/compilerDebug",
+            "args": ["Compiler/cload.asm"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

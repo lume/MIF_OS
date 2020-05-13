@@ -82,8 +82,8 @@ enum
     STOREP,
     STOREV,
     JO,
-    JC,
-    JP
+    JP,
+    JC
 };
 
 void Cpu::OP_STOP()
@@ -336,7 +336,7 @@ void Cpu::OP_JZ()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -351,7 +351,7 @@ void Cpu::OP_JNZ()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -366,7 +366,7 @@ void Cpu::OP_JL()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -381,7 +381,7 @@ void Cpu::OP_JLE()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -396,7 +396,7 @@ void Cpu::OP_JG()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -411,7 +411,7 @@ void Cpu::OP_JGE()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -426,7 +426,7 @@ void Cpu::OP_JO()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -441,7 +441,7 @@ void Cpu::OP_JP()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -456,7 +456,7 @@ void Cpu::OP_JC()
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
-        pc += offset;
+        pc = offset;
     }
     else
     {
@@ -469,7 +469,7 @@ void Cpu::OP_JMP()
     pc++;
     uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
-    pc += offset;
+    pc = offset;
 }
 
 void Cpu::OP_MOD()
