@@ -15,3 +15,6 @@ pedantic:
 
 compiler:
 	g++ -ICompiler/ Compiler/main.cpp Compiler/compiler.cpp -o compiler
+
+compilerDebug:
+	g++ -g -D DEBUG -ICompiler/ Compiler/main.cpp Compiler/compiler.cpp -o compilerDebug

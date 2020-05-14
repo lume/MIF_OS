@@ -75,7 +75,7 @@ class Memcontrol
         void WriteSegment(Segment segment, int address, int value);
         uint16_t ReadSegment(Segment segment, int address);
 
-        bool CheckIfVarExists(Program program, int var); //returns an address for a new variable
+        int GetVarAddrIfExists(Program program, int var); //returns an address for a new variable
         int FindVarAddress(Program program, int var);
         int FindPtrAddress();
 

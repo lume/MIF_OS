@@ -166,6 +166,8 @@ uint32_t src_counter = 0; // position from which the code starts
 std::vector<int> code;  // code segment
 std::map<std::string, int> labels;
 
+bool stopFound = false;
+
 std::vector<int> CompileToMemory(char* sourceFile)
 {
     char line[64];
@@ -209,22 +211,21 @@ std::vector<int> CompileToMemory(char* sourceFile)
 
     // Closing operation
     fclose(stream);
-   /* printf("\n\nFinal compilation result: \n");
+    printf("\n\nFinal compilation result: \n");
     printf("[");
         std::for_each(code.begin(), code.end(),[](int i){
             printf("%d,", i);
         });
-    printf("]");*/
+    printf("]");
     return code;
 }
 
 void CompileToFile(char* sourceFile, std::string output)
 {
     std::vector<int> machineCode = CompileToMemory(sourceFile);
-    if(machineCode[machineCode.size()-1] != 0)
+    if(!stopFound)
     {
-        std::cout << "\nThe program has no stop at the end! compilation failed\n" << std::endl;
-        exit(-1);
+        std::cout << "\nWarning: the program has no stop\n" << std::endl;
     } 
     std::ofstream ofile(output);
 
@@ -338,6 +339,9 @@ void ParseMnemo(char* mnemo, char* line)
     //
     // This is not a jump
     int opcode = getOpcode(mnemToken);
+    if(opcode == STOP_OPC)
+        stopFound = true;
+
     code.insert(code.end(), opcode);
     int opsize = getOpSize(mnemToken);
     if(opsize > 1)
@@ -357,11 +361,11 @@ void ParseMnemo(char* mnemo, char* line)
     }
     src_counter += opsize;
 
-    /* printf("[");
+     printf("[");
         std::for_each(code.begin(), code.end(),[](int i){
             printf("%d,", i);
         });
-    printf("]");*/
+    printf("]");
     return;
 }   
 

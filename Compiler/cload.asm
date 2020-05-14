@@ -1,6 +1,7 @@
 var a
 jmp test
 loadi 1
+
 inc
 inc
 inc

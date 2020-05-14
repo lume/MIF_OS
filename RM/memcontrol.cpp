@@ -242,17 +242,18 @@ int Memcontrol::FindVarAddress(Program program, int var)
     throw new std::runtime_error("Failed to find variable");
 }
 
-bool Memcontrol::CheckIfVarExists(Program program, int var)
+int Memcontrol::GetVarAddrIfExists(Program program, int var)
 {
     int startAddress = ConvertToPhysAddress(program.dataSegment.startPointer);
+    int varAddr = -1;
     for(int i = 0; i < program.dataSegment.memory.addresses.size(); i+=2)
     {
         if(RAM[startAddress+i] == var)
         {
-            return true;
+            varAddr = startAddress+i;
         }
     }
-    return false;
+    return varAddr;
 }  
 
 Program Memcontrol::PrepareProgramMemory(Program program)

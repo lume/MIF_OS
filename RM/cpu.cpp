@@ -742,16 +742,19 @@ void Cpu::OP_VAR()
 {
     pc++;
     int x = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-    if(memcontroller.CheckIfVarExists(activeProgram, x))
+    int oldVarAddr = memcontroller.GetVarAddrIfExists(activeProgram, x));
+    
+    if(oldVarAddr != -1)
     {
-        std::cout << "CRASH!!! Such variable already exists! " << char(x) << "(" << x << ")OP_VAR" << std::endl;
-        throw new std::runtime_error("Such variable already exists");
+        pc++;
     }
-    int varAddr = activeProgram.dataSegment.writePointer;
-    RAM[varAddr] = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-    RAM[varAddr+1] = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-    pc++;
-    activeProgram.dataSegment.writePointer += 2; 
+    else{
+        int varAddr = activeProgram.dataSegment.writePointer;
+        RAM[varAddr] = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+        RAM[varAddr+1] = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+        pc++;
+        activeProgram.dataSegment.writePointer += 2; 
+    }
 }
 
 void Cpu::OP_PTR()
