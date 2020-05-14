@@ -88,6 +88,9 @@ std::string undefinedLabel(char* label);
 #define JP_OPC 53
 #define JC_OPC 54
 #define RET_OPC 55
+#define STR_OPC 56
+#define RSTR_OPC 57
+#define DELSTR_OPC 58
 
 // Instruction sizes
 #define STOP_SIZE 1
@@ -146,13 +149,16 @@ std::string undefinedLabel(char* label);
 #define JC_SIZE 2
 #define JP_SIZE 2
 #define RET_SIZE 1
+#define STR_SIZE 2
+#define RSTR_SIZE 2
+#define DELSTR_SIZE 2
 
 // List of mnemonics
 const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "storea", "storer", "storev", "storep", "adda", "addi", "addr", 
 "suba", "subi", "subr", "mula", "muli", "mulr", "diva", "divi", "divr",
 "jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "mod", "push", "pop", "inc", "dec",
 "shl", "shr", "int", "anda", "andi", "andr", "ora", "ori", "orr", "xora", "xori", "xorr",
-"cmpa", "cmpi", "cmpr", "call", "ret", "var", "ptr", "ret"};
+"cmpa", "cmpi", "cmpr", "call", "ret", "var", "ptr", "ret", "str", "rstr", "delstr"};
 
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
@@ -343,6 +349,21 @@ void ParseMnemo(char* mnemo, char* line)
     int opcode = getOpcode(mnemToken);
     if(opcode == STOP_OPC)
         stopFound = true;
+    
+    if(opcode == STR_OPC)
+    {
+        //this is string, parse accordingly
+        code.insert(code.end(), opcode);
+        char* arg = strtok(NULL, delim);
+        std::string s(arg);
+        for(int i = 0; i < s.length(); i++)
+        {
+            code.insert(code.end(), (int)s[i]);
+        }
+        code.insert(code.end(), 0);
+        src_counter += s.length() + 2;
+        return;
+    }
 
     code.insert(code.end(), opcode);
     int opsize = getOpSize(mnemToken);
@@ -580,6 +601,12 @@ int getOpcode(char* mnem)
         return JC_OPC;
     if(strcmp(mnem, "ret") == 0)
         return RET_OPC;
+    if(strcmp(mnem, "str") == 0)
+        return STR_OPC;
+    if(strcmp(mnem, "rstr") == 0)
+        return RSTR_OPC;
+    if(strcmp(mnem, "delstr") == 0)
+        return DELSTR_OPC;
     return 999;
 }
 
@@ -699,5 +726,11 @@ int getOpSize(char* mnem)
         return PTR_SIZE;
     if(strcmp(mnem, "ret") == 0)
         return RET_SIZE;
+    if(strcmp(mnem, "str") == 0)
+        return STR_SIZE;
+    if(strcmp(mnem, "rstr") == 0)
+        return RSTR_SIZE;
+    if(strcmp(mnem, "delstr") == 0)
+        return DELSTR_SIZE;
     return 999;
 }

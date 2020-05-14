@@ -121,6 +121,11 @@ class Cpu
 
         void OP_RET();
 
+        //string operations
+        void OP_STR();
+        void OP_RSTR();
+        void OP_DELSTR();
+
         int AddInternal(int x, int y);
         int MulInternal(int x, int y);
         bool ParityCheck();

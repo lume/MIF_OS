@@ -84,12 +84,49 @@ enum
     JO,
     JP,
     JC,
-    RET
+    RET,
+    STR,
+    RSTR,
+    DELSTR
 };
 
 void Cpu::OP_STOP()
 {
     fs |= ef;
+}
+
+void Cpu::OP_STR()
+{
+    std::vector<char> contents;
+    char c = -1;
+    pc++;
+    while(c != 0)
+    {
+        c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+        contents.insert(contents.end(), c);
+        pc++;
+    }
+    auto memBlock = memcontroller.HeapAlloc(activeProgram, contents.size());
+    std::string str(contents.begin(), contents.end());
+    memcontroller.StoreStringInHeap(memBlock, str);
+    acc = memBlock.start;
+    pc++;
+}
+
+void Cpu::OP_RSTR()
+{
+
+}
+
+void Cpu::OP_DELSTR()
+{
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start == acc)
+        {
+            memcontroller.HeapFree(&i);
+        }
+    }
 }
 
 void Cpu::OP_LOADA()
