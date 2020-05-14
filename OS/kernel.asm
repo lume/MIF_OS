@@ -1,13 +1,22 @@
-jmp test
-label main
+label kernelmain
+call printHello
+
+loadv x
+inc
+storev x
+
 jmp end
 
-label test 
-var x
+
+label printHello
 loadi 10
+var x 
 storev x
-jmp main 
+ret
+
+inc 
+inc
+
 
 label end
 stop
-

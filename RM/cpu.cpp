@@ -83,7 +83,8 @@ enum
     STOREV,
     JO,
     JP,
-    JC
+    JC,
+    RET
 };
 
 void Cpu::OP_STOP()
@@ -105,6 +106,13 @@ void Cpu::OP_LOADI()
     int varVal = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     acc = varVal;
     pc++;
+}
+
+void Cpu::OP_RET()
+{
+    if(retReg != -1)
+        pc = retReg;
+    retReg = -1;
 }
 
 void Cpu::OP_LOADR()
@@ -721,7 +729,8 @@ void Cpu::OP_CALL()
     pc++;
     uint16_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
     pc++;
-    pc += offset;
+    retReg = pc;
+    pc = offset;
 }
 
 void Cpu::OP_SHR()
@@ -742,7 +751,7 @@ void Cpu::OP_VAR()
 {
     pc++;
     int x = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-    int oldVarAddr = memcontroller.GetVarAddrIfExists(activeProgram, x));
+    int oldVarAddr = memcontroller.GetVarAddrIfExists(activeProgram, x);
     
     if(oldVarAddr != -1)
     {
@@ -973,6 +982,9 @@ void Cpu::Decode()
         break;
     case(JP):
         OP_JP();
+        break;
+    case(RET):
+        OP_RET();
         break;
     default:
         UNDEFINED();

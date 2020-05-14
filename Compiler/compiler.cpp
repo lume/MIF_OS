@@ -87,6 +87,7 @@ std::string undefinedLabel(char* label);
 #define JO_OPC 52
 #define JP_OPC 53
 #define JC_OPC 54
+#define RET_OPC 55
 
 // Instruction sizes
 #define STOP_SIZE 1
@@ -144,13 +145,14 @@ std::string undefinedLabel(char* label);
 #define JO_SIZE 2
 #define JC_SIZE 2
 #define JP_SIZE 2
+#define RET_SIZE 1
 
 // List of mnemonics
 const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "storea", "storer", "storev", "storep", "adda", "addi", "addr", 
 "suba", "subi", "subr", "mula", "muli", "mulr", "diva", "divi", "divr",
 "jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "mod", "push", "pop", "inc", "dec",
 "shl", "shr", "int", "anda", "andi", "andr", "ora", "ori", "orr", "xora", "xori", "xorr",
-"cmpa", "cmpi", "cmpr", "call", "var", "ptr"};
+"cmpa", "cmpi", "cmpr", "call", "ret", "var", "ptr", "ret"};
 
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
@@ -576,6 +578,8 @@ int getOpcode(char* mnem)
         return JO_OPC;
     if(strcmp(mnem, "jc") == 0)
         return JC_OPC;
+    if(strcmp(mnem, "ret") == 0)
+        return RET_OPC;
     return 999;
 }
 
@@ -693,5 +697,7 @@ int getOpSize(char* mnem)
         return VAR_SIZE;
     if(strcmp(mnem, "ptr") == 0)
         return PTR_SIZE;
+    if(strcmp(mnem, "ret") == 0)
+        return RET_SIZE;
     return 999;
 }

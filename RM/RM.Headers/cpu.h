@@ -27,6 +27,7 @@ class Cpu
         int fs = 0x0; // flags
         int xReg = 0x0; // x register
         int cReg = 0x0; // c register
+        int retReg = 0x0; // return register used in calls
 
 
         void Fetch();
@@ -117,6 +118,8 @@ class Cpu
         void OP_STOREV();
         void OP_LOADP();
         void OP_STOREP();
+
+        void OP_RET();
 
         int AddInternal(int x, int y);
         int MulInternal(int x, int y);
