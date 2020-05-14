@@ -53,10 +53,19 @@ struct Program
     CpuSnapshot cpuSnapshot;
 };
 
+struct HeapBlockHandler
+{
+    Program owner;
+    int size;
+    int start;
+    bool free;
+};
+
 inline std::array<int, RAM_SIZE> RAM = {0};
 inline std::array<int, VRAM_SIZE> VRAM = {0};
 inline std::array<Page, PAGETABLE_SIZE> pageTable;
 inline std::array<int, FRAMETABLE_SIZE> frameTable;
+inline std::vector<HeapBlockHandler> HeapBlockHandlers;
 
 class Memcontrol
 {
@@ -83,6 +92,11 @@ class Memcontrol
         int ConvertToPhysAddress(int addr);
         
         int MoveToSwap(int pageNumber); 
+
+        HeapBlockHandler HeapAlloc(Program owner, int size);
+        void HeapFree(HeapBlockHandler *handler);
+        void StoreStringInHeap(HeapBlockHandler handler, std::string str);
+        std::string ReadStringFromHeap(HeapBlockHandler handler);
 
     private:
         std::vector<int> freeFramePool;

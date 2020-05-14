@@ -390,3 +390,70 @@ void Memcontrol::ClearPageBeforeUse(int page)
         RAM[ConvertToPhysAddress(addresses[i])] = 0;
     }
 }
+
+HeapBlockHandler Memcontrol::HeapAlloc(Program owner, int size)
+{
+    HeapBlockHandler newBlock;
+
+    for(auto block : HeapBlockHandlers)
+    {
+        if(block.free && block.size <= size)
+        {
+            //allocate here
+            newBlock.start = block.start;
+            newBlock.size = size;
+            newBlock.owner = owner;
+        }
+    }
+    if(HeapBlockHandlers.size() > 0 && 
+    HeapBlockHandlers.back().start + HeapBlockHandlers.back().size + size <= RAM_SIZE)
+    {
+        //allocate here
+        newBlock.start = HeapBlockHandlers.back().start + HeapBlockHandlers.back().size + 1;
+        newBlock.size = size;
+        newBlock.owner = owner;
+    }
+    else if(HeapBlockHandlers.size() == 0)
+    {
+        //allocate here
+        newBlock.start = HEAP_START;
+        newBlock.size = size;
+        newBlock.owner = owner;
+    }
+    else
+    {
+        std::cout << "No more heap memory" << std::endl;
+        throw std::runtime_error("No more heap memory");
+    }
+    newBlock.free = false;
+    HeapBlockHandlers.insert(HeapBlockHandlers.end(), newBlock);
+    return newBlock;
+}
+
+void Memcontrol::HeapFree(HeapBlockHandler *handler)
+{
+    handler->free = true;
+}
+
+void Memcontrol::StoreStringInHeap(HeapBlockHandler handler, std::string str)
+{
+    int memstart = handler.start;
+    for(int i = 0; i < str.length(); i++)
+    {
+        RAM[memstart+i] = str[i];
+    }
+    RAM[memstart+str.length()+1] = 0;
+}
+
+std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
+{
+    std::vector<int> contents;
+    
+    for(int i = 0; i < handler.size; i++)
+    {
+        contents.insert(contents.end(), RAM[handler.start+i]);
+    }
+
+    std::string str(contents.begin(), contents.end());
+    return str;
+}
