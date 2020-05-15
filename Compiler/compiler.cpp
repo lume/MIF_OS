@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <iterator>
+#include <functional>
 
 char CheckIfMnemo(char* str);
 char CheckIfDirct(char* str);
@@ -301,7 +302,7 @@ void ParseMnemo(char* mnemo, char* line)
             {
                 //not found
                 
-                labels.insert({jumpTarget, 0});
+                labels.insert({jumpTarget, -1});
 
                 std::string undefLabel = undefinedLabel(jumpTarget);
                 std::cout << undefLabel << std::endl;
@@ -316,11 +317,15 @@ void ParseMnemo(char* mnemo, char* line)
                     code.insert(code.end(), undefLabel[i]);
                 }*/
 
-                std::stringstream str;
+                /*std::stringstream str;
                 str << jumpTarget;
                 int val;
                 str >> std::hex >> val;
-                code.insert(code.end(), val);
+                code.insert(code.end(), val);*/
+                std::string stringToHash(jumpTarget);
+                std::hash<std::string> hasher;
+                auto hashed = hasher(stringToHash);
+                code.insert(code.end(), (int)hashed);
 
                 /*printf("[");
                 std::for_each(code.begin(), code.end(),[](int i){
@@ -429,17 +434,21 @@ void compile_LABEL(char* line)
             std::cout << it->first << " " << it->second << std::endl; 
         }
     }
-    else if(labels[paramToken] == 0)
+    else if(labels[paramToken] == -1)
     {
-        std::stringstream str;
+        std::string stringToHash(paramToken);
+        std::hash<std::string> hasher;
+        auto hashed = hasher(stringToHash);
+
+        /*std::stringstream str;
         str << paramToken;
         int val;
-        str >> std::hex >> val;
+        str >> std::hex >> val;*/
         std::vector<int> positionsToChange;
         labels[paramToken] =  src_counter;
         for(int i = 0; i < code.size(); i++)
         {
-            if(code[i] == val)
+            if(code[i] == (int)hashed)
                 positionsToChange.insert(positionsToChange.end(), i);
         }
 
