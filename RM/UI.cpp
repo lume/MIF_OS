@@ -31,6 +31,7 @@ void UI::Update()
     std::cout << "fs: " << snap.fs << " ";
     std::cout << "xReg: " << snap.xReg << " ";
     std::cout << "cReg: " << snap.cReg << " ";
+    std::cout << "retReg: " << snap.retReg << " ";
     std::cout << std::endl;
 
     std::cout << "RAM: ";

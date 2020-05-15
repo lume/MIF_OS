@@ -129,4 +129,6 @@ class Cpu
         int AddInternal(int x, int y);
         int MulInternal(int x, int y);
         bool ParityCheck();
+
+        void int10();
 };

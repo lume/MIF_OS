@@ -42,6 +42,7 @@ struct CpuSnapshot
     int fs = 0x0; // flags
     int xReg = 0x0; // x register
     int cReg = 0x0; // c register
+    int retReg = 0x0; // ret register
 };
 
 

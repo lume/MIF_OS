@@ -20,18 +20,17 @@ int main(int argc, char** argv)
     }
 
 
-    Cpu cpu = Cpu();
-
     if(step)
     {
         std::cout << "Press any key to start...";
-
-        UI ui = UI(argv[1], step);
-        Clock clock = Clock(cpu, step);
-
-        clock.Start(argv[1], ui);
-        clock.Update();
     }
 
+    Cpu cpu = Cpu();
+    UI ui = UI(argv[1], step);
+
+    Clock clock = Clock(cpu, step);
+
+    clock.Start(argv[1], ui);
+    clock.Update();
     return 0;
 }

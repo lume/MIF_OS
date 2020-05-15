@@ -110,7 +110,7 @@ void Cpu::OP_STR()
     std::string str(contents.begin(), contents.end());
     memcontroller.StoreStringInHeap(memBlock, str);
     acc = memBlock.start;
-    pc++;
+    //pc++;
 }
 
 void Cpu::OP_RSTR()
@@ -572,6 +572,20 @@ void Cpu::OP_DEC()
 
 void Cpu::OP_INT()
 {
+    // TODO: Implement mapping to int handlers
+    pc++;
+    acc = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+    switch(acc)
+    {
+        case 1:
+            break;
+        case 10:
+            int10();
+            break;
+        default:
+            throw std::runtime_error("Bad interrupt");
+    }
+    pc++;
 }
 
 void Cpu::OP_ANDA()
@@ -1023,6 +1037,15 @@ void Cpu::Decode()
     case(RET):
         OP_RET();
         break;
+    case(STR):
+        OP_STR();
+        break;
+    case(RSTR):
+        OP_RSTR();
+        break;
+    case(DELSTR):
+        OP_DELSTR();
+        break;
     default:
         UNDEFINED();
         break;
@@ -1169,6 +1192,7 @@ CpuSnapshot Cpu::SaveToSnapshot()
     snap.pc = pc;
     snap.sp = sp;
     snap.xReg = xReg;
+    snap.retReg = retReg;
     return snap;
 }
 
@@ -1208,4 +1232,21 @@ bool Cpu::ParityCheck()
         n     = n & (n - 1); 
     }      
     return parity; 
+}
+
+// Interrupts
+void Cpu::int10()
+{
+    HeapBlockHandler handle;
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start = xReg)
+        {
+            handle = i;
+            xReg = 0;
+            break;
+        }
+    }
+    std::string str = memcontroller.ReadStringFromHeap(handle);
+    printf("%s\n", str.c_str());
 }

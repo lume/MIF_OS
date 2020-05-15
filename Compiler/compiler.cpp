@@ -358,7 +358,8 @@ void ParseMnemo(char* mnemo, char* line)
         std::string s(arg);
         for(int i = 0; i < s.length(); i++)
         {
-            code.insert(code.end(), (int)s[i]);
+            int x = (int)s[i];
+            code.insert(code.end(), x);
         }
         code.insert(code.end(), 0);
         src_counter += s.length() + 2;

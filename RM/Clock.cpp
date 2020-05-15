@@ -30,11 +30,11 @@ void Clock::Update()
     }
     else
     {
-        this->ui.Update();
+        //this->ui.Update();
         while(isOn)
         {
             activeProgram = cpu.ExecuteProgram(activeProgram, 1);
-            this->ui.cpu = cpu;
+            //this->ui.cpu = cpu;
 
             if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
             {
@@ -43,16 +43,16 @@ void Clock::Update()
                 isOn = false;
             }
         }
-        this->ui.Update();
+        //this->ui.Update();
     }
 }
 
 void Clock::Start(std::string programName, UI ui)
 {
     InitSwapDisk();
-    this->ui = ui;
+    //this->ui = ui;
     activeProgram = cpu.LoadProgram(programName); 
-    this->ui.cpu = cpu;
+    //this->ui.cpu = cpu;
 }
 
 void Clock::InitSwapDisk()
