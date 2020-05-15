@@ -82,6 +82,7 @@ class Memcontrol
 {
     public: 
         Memcontrol();
+        int activeProcessId;
 
         Memory AllocateMemory(uint16_t size, std::vector<int> pagesToIgnore = {});
         void FreeMemory(Memory mem);

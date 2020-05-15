@@ -132,6 +132,7 @@ class Cpu
         int MulInternal(int x, int y);
         bool ParityCheck();
 
-        void int3();
-        void int10();
+        void int3(); //Load program from disk
+        void int4(); //Execute process by Id
+        void int10(); // print
 };

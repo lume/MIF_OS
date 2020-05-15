@@ -582,6 +582,9 @@ void Cpu::OP_INT()
         case 3:
             int3(); // fork process
             break;
+        case 4:
+            int4(); // execute process by id
+            break;
         case 10:
             int10(); // print
             break;
@@ -1123,11 +1126,8 @@ Program Cpu::LoadProgram(std::vector<int> programCode)
     sp = stackSegment.startPointer + PAGE_SIZE-1;
     pc = 0;
 
-    activeProgram = {dataSegment, codeSegment, stackSegment, {pc, 0, 0, 0, sp, 0, 0}};
-
-    return activeProgram;
+    return {dataSegment, codeSegment, stackSegment, {pc, 0, 0, 0, sp, 0, 0}};
 }
-
 Program Cpu::LoadProgram(std::string filename)
 { 
     std::vector<int> machineCode;
@@ -1300,6 +1300,7 @@ void Cpu::int10()
 void Cpu::int3()
 {
     HeapBlockHandler handle;
+    handle.size = -1;
     for(auto i : HeapBlockHandlers)
     {
         if(i.start = cReg)
@@ -1308,14 +1309,35 @@ void Cpu::int3()
             break;
         }
     }
-   // std::string str = memcontroller.ReadStringFromHeap(handle);
+    if(handle.size == -1)
+    {
+        //TODO: kill parent process with error
+        //return;
+    }
+    std::string str = memcontroller.ReadStringFromHeap(handle);
     //Create program
-    //auto code = iocontroller.FindProgramCode(str);
-    std::string str = "a";
-    auto program = LoadProgram("kern");
+    auto code = iocontroller.FindProgramCode(str);
+    auto program = LoadProgram(code); 
     //
     acc = memcontroller.ForkProcess(str, program);
     cReg = 0;
+}
 
-    ExecuteProgram(program);
+void Cpu::int4()
+{
+    int processId = xReg;
+    if(memcontroller.activeProcessId == -1)
+    {
+        memcontroller.activeProcessId = processId;
+        activeProgram = processList[memcontroller.activeProcessId].program;
+    }
+    else
+    {
+        auto snap = SaveToSnapshot();
+        processList[memcontroller.activeProcessId].program.cpuSnapshot = snap;
+        memcontroller.activeProcessId = processId;
+        activeProgram = processList[memcontroller.activeProcessId].program;
+    }
+    
+    ExecuteProgram(activeProgram);
 }

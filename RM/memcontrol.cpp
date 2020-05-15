@@ -207,6 +207,7 @@ std::vector<int> Memcontrol::GetAddressList(std::vector<int> pages)
 
 Memcontrol::Memcontrol()
 {
+    activeProcessId = -1;
     for(int i = 0; i < PAGETABLE_SIZE; i++)
     {
         pageTable[i].frame = i;
@@ -460,7 +461,6 @@ std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
 
 int Memcontrol::ForkProcess(std::string programName, Program program)
 {
-    //search for program name in drive
     Process process;
     int id = processList.size() + 1;
     process.id = id;
