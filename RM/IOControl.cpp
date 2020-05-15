@@ -134,3 +134,9 @@ std::fstream& IOControl::GotoLine(std::fstream& file, int lineNum)
     }
     return file;
 }
+
+std::vector<int> IOControl::FindProgramCode(std::string programName)
+{
+    std::vector<int> a;
+    return a;
+}

@@ -28,7 +28,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/rmDebug",
-            "args": ["kern"],
+            "args": ["bootl"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

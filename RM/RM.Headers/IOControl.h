@@ -34,6 +34,8 @@ class IOControl
         // Initialize a disk if it still does not exist
         void InitDisk();
         void InitCharBuffer();
+
+        std::vector<int> FindProgramCode(std::string programName);
     private:
         static void* WriteSwapDataInternal(void* arg);
         static void* ReadSwapDataInternal(void* arg); // returns an array of data from a disk

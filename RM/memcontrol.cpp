@@ -457,3 +457,16 @@ std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
     std::string str(contents.begin(), contents.end());
     return str;
 }
+
+int Memcontrol::ForkProcess(std::string programName, Program program)
+{
+    //search for program name in drive
+    Process process;
+    int id = processList.size() + 1;
+    process.id = id;
+    process.name = programName;
+    process.program = program;
+    process.status = 1;
+    processList.insert(processList.end(), process);
+    return id;
+}

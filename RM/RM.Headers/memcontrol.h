@@ -54,6 +54,15 @@ struct Program
     CpuSnapshot cpuSnapshot;
 };
 
+struct Process
+{
+    int id;
+    std::string name;
+    Program program;
+    std::vector<int> childProcesses;
+    int status; // 0 dead 1 alive 2 zombie
+};
+
 struct HeapBlockHandler
 {
     Program owner;
@@ -67,6 +76,7 @@ inline std::array<int, VRAM_SIZE> VRAM = {0};
 inline std::array<Page, PAGETABLE_SIZE> pageTable;
 inline std::array<int, FRAMETABLE_SIZE> frameTable;
 inline std::vector<HeapBlockHandler> HeapBlockHandlers;
+inline std::vector<Process> processList;
 
 class Memcontrol
 {
@@ -98,6 +108,8 @@ class Memcontrol
         void HeapFree(HeapBlockHandler *handler);
         void StoreStringInHeap(HeapBlockHandler handler, std::string str);
         std::string ReadStringFromHeap(HeapBlockHandler handler);
+
+        int ForkProcess(std::string programName, Program program); //returns new process id
 
     private:
         std::vector<int> freeFramePool;

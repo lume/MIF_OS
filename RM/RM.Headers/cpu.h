@@ -8,11 +8,13 @@ class Cpu
 {
     public:
         Memcontrol memcontroller = Memcontrol();
+        IOControl iocontroller = IOControl();
         Program activeProgram;
 
         Cpu(){}
         void ShowRam(); // Show the contents of the RAM
         Program LoadProgram(std::string filename);// Load the Program machine code to the memory
+        Program LoadProgram(std::vector<int> programCode);// Load the Program machine code to the memory
         Program ExecuteProgram(Program program, int cycles = 14800); // Execute the loaded program for some cycles
         CpuSnapshot SaveToSnapshot();
         void SetFromSnapshot(CpuSnapshot snapshot);
@@ -130,5 +132,6 @@ class Cpu
         int MulInternal(int x, int y);
         bool ParityCheck();
 
+        void int3();
         void int10();
 };

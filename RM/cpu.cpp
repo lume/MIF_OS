@@ -579,8 +579,11 @@ void Cpu::OP_INT()
     {
         case 1:
             break;
+        case 3:
+            int3(); // fork process
+            break;
         case 10:
-            int10();
+            int10(); // print
             break;
         default:
             throw std::runtime_error("Bad interrupt");
@@ -1082,6 +1085,49 @@ void Cpu::ShowRam()
     printf("]\n");
 }
 
+Program Cpu::LoadProgram(std::vector<int> programCode)
+{
+    // Machine code is loaded to the list, now we load this code into RAM
+    Segment codeSegment;
+    Segment stackSegment;
+    Segment dataSegment;
+
+    codeSegment = memcontroller.InitSegment(0);
+    dataSegment = memcontroller.InitSegment(0);
+    stackSegment = memcontroller.InitSegment(1);
+    std::vector<int> pagesToIgnore;
+
+    for(int i = 0; i < programCode.size(); i++){
+        if(i >= codeSegment.memory.addresses.size())
+        {
+            pagesToIgnore.insert(pagesToIgnore.end(), dataSegment.memory.usedPages.begin(),
+            dataSegment.memory.usedPages.end());
+
+            pagesToIgnore.insert(pagesToIgnore.end(), codeSegment.memory.usedPages.begin(),
+            codeSegment.memory.usedPages.end());
+
+            pagesToIgnore.insert(pagesToIgnore.end(), stackSegment.memory.usedPages.begin(),
+            stackSegment.memory.usedPages.end());
+
+            Memory newmem = memcontroller.AllocateMemory(programCode.size() - codeSegment.memory.addresses.size(), pagesToIgnore);
+
+            codeSegment.memory.usedPages.insert(codeSegment.memory.usedPages.end(),
+            newmem.usedPages.begin(), newmem.usedPages.end());
+            
+            codeSegment.memory.addresses.insert(codeSegment.memory.addresses.end(),
+            newmem.addresses.begin(), newmem.addresses.end());
+        }
+        memcontroller.WriteSegment(codeSegment, codeSegment.memory.addresses[i], programCode[i]);
+    }
+
+    sp = stackSegment.startPointer + PAGE_SIZE-1;
+    pc = 0;
+
+    activeProgram = {dataSegment, codeSegment, stackSegment, {pc, 0, 0, 0, sp, 0, 0}};
+
+    return activeProgram;
+}
+
 Program Cpu::LoadProgram(std::string filename)
 { 
     std::vector<int> machineCode;
@@ -1249,4 +1295,27 @@ void Cpu::int10()
     }
     std::string str = memcontroller.ReadStringFromHeap(handle);
     printf("%s\n", str.c_str());
+}
+
+void Cpu::int3()
+{
+    HeapBlockHandler handle;
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start = cReg)
+        {
+            handle = i;
+            break;
+        }
+    }
+   // std::string str = memcontroller.ReadStringFromHeap(handle);
+    //Create program
+    //auto code = iocontroller.FindProgramCode(str);
+    std::string str = "a";
+    auto program = LoadProgram("kern");
+    //
+    acc = memcontroller.ForkProcess(str, program);
+    cReg = 0;
+
+    ExecuteProgram(program);
 }
