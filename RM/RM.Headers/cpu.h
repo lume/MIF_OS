@@ -17,6 +17,7 @@ class Cpu
         Program LoadProgram(std::vector<int> programCode);// Load the Program machine code to the memory
         Program ExecuteProgram(Program program, int cycles = 14800); // Execute the loaded program for some cycles
         CpuSnapshot SaveToSnapshot();
+        Program LoadBootloader();
         void SetFromSnapshot(CpuSnapshot snapshot);
 
     private:

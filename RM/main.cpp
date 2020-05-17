@@ -10,8 +10,8 @@ int main(int argc, char** argv)
 
     if(argc < 2)
     {
-        std::cout << "Please provide a program to launch and add 'step' if you want to run the program in debug mode";
-        exit(1);
+        //std::cout << "Please provide a program to launch and add 'step' if you want to run the program in debug mode";
+        //exit(1);
     }
     else if(argc > 2)
     {

@@ -1128,6 +1128,15 @@ Program Cpu::LoadProgram(std::vector<int> programCode)
 
     return {dataSegment, codeSegment, stackSegment, {0, 0, 0, 0, newSP, 0, 0}};
 }
+
+Program Cpu::LoadBootloader()
+{
+    auto code = iocontroller.FindProgramCode("bootl");
+    Program program = LoadProgram(code);
+    activeProgram = program;
+    return activeProgram;
+}
+
 Program Cpu::LoadProgram(std::string filename)
 { 
     std::vector<int> machineCode;

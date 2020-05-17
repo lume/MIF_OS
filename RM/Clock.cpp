@@ -51,7 +51,9 @@ void Clock::Start(std::string programName, UI ui)
 {
     InitSwapDisk();
     //this->ui = ui;
-    activeProgram = cpu.LoadProgram(programName); 
+    std::cout << "Loading bootloader...\n";
+    activeProgram = cpu.LoadProgram("bootl"); 
+    std::cout << "Bootloader is loaded, executing...\n";
     //this->ui.cpu = cpu;
 }
 

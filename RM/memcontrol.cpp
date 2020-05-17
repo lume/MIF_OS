@@ -452,8 +452,12 @@ std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
     
     for(int i = 0; i < handler.size; i++)
     {
-        contents.insert(contents.end(), RAM[handler.start+i]);
+        int c = RAM[handler.start+i];
+       
+        if(c != 0)
+            contents.insert(contents.end(), RAM[handler.start+i]);
     }
+    contents.insert(contents.end(), 0);
 
     std::string str(contents.begin(), contents.end());
     return str;
