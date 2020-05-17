@@ -462,11 +462,10 @@ std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
 int Memcontrol::ForkProcess(std::string programName, Program program)
 {
     Process process;
-    int id = processList.size() + 1;
-    process.id = id;
     process.name = programName;
     process.program = program;
     process.status = 1;
     processList.insert(processList.end(), process);
-    return id;
+    process.id = processList.size()-1;
+    return process.id;
 }

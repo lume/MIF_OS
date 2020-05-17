@@ -9,11 +9,12 @@ def installPrograms(filenames: list()) -> None:
                 filenameOrd = ""
                 for f in filenameEncoded:
                     filenameOrd = filenameOrd + str(ord(f)) + " "
+                filenameOrd = filenameOrd + "0 "
                 
                 readData = subfile.read()
                 readDataList = readData.split();
                 
-                code = "1453 " + str(len(filename)) + " " + filenameOrd + str(len(readDataList)) + " " + readData
+                code = "1453 " + str(len(filename)+1) + " " + filenameOrd + str(len(readDataList)) + " " + readData
                 programsCode = programsCode + code
         except FileNotFoundError:
             print(filename + " could not be found")

@@ -32,5 +32,6 @@ int main(int argc, char** argv)
 
     clock.Start(argv[1], ui);
     clock.Update();
+
     return 0;
 }

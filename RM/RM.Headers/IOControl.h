@@ -5,6 +5,8 @@
 #include <semaphore.h>
 #include "SizeDefinitions.h"
 
+#define DRIVE "drive"
+
 // This mutex is to be used for file read/write operations
 inline pthread_mutex_t swapMutex;
 

@@ -574,8 +574,8 @@ void Cpu::OP_INT()
 {
     // TODO: Implement mapping to int handlers
     pc++;
-    acc = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-    switch(acc)
+    int sw = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+    switch(sw)
     {
         case 1:
             break;
@@ -1123,10 +1123,10 @@ Program Cpu::LoadProgram(std::vector<int> programCode)
         memcontroller.WriteSegment(codeSegment, codeSegment.memory.addresses[i], programCode[i]);
     }
 
-    sp = stackSegment.startPointer + PAGE_SIZE-1;
-    pc = 0;
+    int newSP = stackSegment.startPointer + PAGE_SIZE-1;
+    //pc = 0;
 
-    return {dataSegment, codeSegment, stackSegment, {pc, 0, 0, 0, sp, 0, 0}};
+    return {dataSegment, codeSegment, stackSegment, {0, 0, 0, 0, newSP, 0, 0}};
 }
 Program Cpu::LoadProgram(std::string filename)
 { 
