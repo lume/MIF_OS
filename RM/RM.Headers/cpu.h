@@ -4,6 +4,18 @@
 #include "memcontrol.h"
 
 
+// Flag definition
+enum
+{
+    sf = 1 << 0, // sign
+    zf = 1 << 1, // zero
+    lf = 1 << 2, // lower
+    ef = 1 << 3, // end
+    of = 1 << 4, // overflow
+    cf = 1 << 5, // carry
+    pf = 1 << 6  // parity
+};
+
 class Cpu
 {
     public:
@@ -136,7 +148,8 @@ class Cpu
         int MulInternal(int x, int y);
         bool ParityCheck();
 
-        void int3(); //Load program from disk
-        void int4(); //Execute process by Id
+        void int3();  // Load program from disk
+        void int4();  // Execute process by Id
+        void int5();  // getchar
         void int10(); // print
 };

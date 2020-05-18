@@ -1,20 +1,41 @@
 label kernelmain
 call helloworld
-str other
-storer x
-int 10
+call shell
 jmp end
 
-label helloworld
-str Hello_World
-var x
-storev x
-storer x
+label shell
+str shell
+storer c
+int 3
 
-strcat aaa_concat
+var a
+storev a
+
+loadi 0
+cmpr c
+jz load
+
+jmp error
+
+label load
+loadv a
+storer x
+int 4
+jmp shellEnd
+
+label error
+str shell_not_found
 storer x
 int 10
+jmp shellEnd
 
+label shellEnd
+ret
+
+label helloworld
+str Loading_Shell...
+storer x
+int 10
 ret
 
 label end

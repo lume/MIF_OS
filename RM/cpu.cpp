@@ -13,17 +13,7 @@
 
 //#define RAM memcontroller.RAM
 
-// Flag definition
-enum
-{
-    sf = 1 << 0, // sign
-    zf = 1 << 1, // zero
-    lf = 1 << 2, // lower
-    ef = 1 << 3, // end
-    of = 1 << 4, // overflow
-    cf = 1 << 5, // carry
-    pf = 1 << 6  // parity
-};
+
 
 // Instruction definition
 enum
@@ -92,7 +82,16 @@ enum
 
 void Cpu::OP_STOP()
 {
-    fs |= ef;
+    if(xReg == 9000 && cReg == 9000)
+    {
+        std::cout <<"\nMachine shutting down...\n";
+        exit(0);
+    }
+    else
+    {
+        //TODO: kill current process, return to parent process
+        fs |= ef;
+    }
 }
 
 void Cpu::OP_STR()
@@ -390,7 +389,7 @@ void Cpu::OP_DIVR()
 void Cpu::OP_JZ()
 {
     pc++;
-    if(zf)
+    if(fs & zf)
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
@@ -405,7 +404,7 @@ void Cpu::OP_JZ()
 void Cpu::OP_JNZ()
 {
     pc++;
-    if(!zf)
+    if(fs & zf == 0)
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
@@ -597,6 +596,9 @@ void Cpu::OP_INT()
             break;
         case 4:
             int4(); // execute process by id
+            break;
+        case 5:
+            int5();
             break;
         case 10:
             int10(); // print
@@ -1342,10 +1344,18 @@ void Cpu::int3()
     std::string str = memcontroller.ReadStringFromHeap(handle);
     //Create program
     auto code = iocontroller.FindProgramCode(str);
-    auto program = LoadProgram(code); 
-    //
-    acc = memcontroller.ForkProcess(str, program);
-    cReg = 0;
+    if(code.size() == 0)
+    {
+        cReg = -1;
+    }
+    else
+    {
+        auto program = LoadProgram(code); 
+        
+        acc = memcontroller.ForkProcess(str, program);
+
+        cReg = 0;
+    }
 }
 
 void Cpu::int4()
@@ -1365,6 +1375,21 @@ void Cpu::int4()
     }
     
     ExecuteProgram(activeProgram);
+}
+
+void Cpu::int5()
+{
+    char c = getchar();
+    std::string s;
+    while(c != '\n')
+    {
+        s.push_back(c);
+        c = getchar();
+    }
+
+    auto memBlock = memcontroller.HeapAlloc(activeProgram, s.size());
+    memcontroller.StoreStringInHeap(memBlock, s);
+    acc = memBlock.start;
 }
 
 std::string Cpu::buildString()
