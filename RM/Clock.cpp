@@ -13,41 +13,22 @@ Clock::Clock(Cpu cpu, bool step)
 
 void Clock::Update()
 {
-    if(this->step)
+    //this->ui.Update();
+    while(isOn)
     {
-        while(isOn)
+        activeProgram = cpu.ExecuteProgram(activeProgram, 1);
+        //this->ui.cpu = cpu;
+        if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
         {
-            activeProgram = cpu.ExecuteProgram(activeProgram, 1);
-            this->ui.cpu = cpu;
-            this->ui.Update();
-            if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
-            {
-                std::cout << "Program has finished!";
-                isOn = false;
-            }
-        }
-        this->ui.Update();
-    }
-    else
-    {
-        //this->ui.Update();
-        while(isOn)
-        {
-            activeProgram = cpu.ExecuteProgram(activeProgram, 1);
-            //this->ui.cpu = cpu;
+            std::cout << "Program has finished!";
 
-            if(!((cpu.SaveToSnapshot().fs & (1 << 3)) == 0))
-            {
-                std::cout << "Program has finished!";
-
-                isOn = false;
-            }
-        }
-        //this->ui.Update();
+            isOn = false;
+        }        
     }
+    //this->ui.Update();
 }
 
-void Clock::Start(std::string programName, UI ui)
+void Clock::Start()
 {
     InitSwapDisk();
     //this->ui = ui;

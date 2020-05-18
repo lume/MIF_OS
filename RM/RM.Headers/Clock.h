@@ -12,7 +12,7 @@ class Clock
 
         Clock(Cpu cpu, bool step);
         void Update();
-        void Start(std::string programName, UI ui);
+        void Start();
     private:
         Cpu cpu;
         Memcontrol memcontrol;
@@ -20,6 +20,6 @@ class Clock
         Program activeProgram;
 
         void InitSwapDisk();
-        UI ui = UI();
+       // UI ui = UI();
         bool step;
 };

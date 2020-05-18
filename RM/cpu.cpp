@@ -13,7 +13,6 @@
 
 //#define RAM memcontroller.RAM
 
-
 // Flag definition
 enum
 {
@@ -87,7 +86,8 @@ enum
     RET,
     STR,
     RSTR,
-    DELSTR
+    DELSTR,
+    STRCAT
 };
 
 void Cpu::OP_STOP()
@@ -97,20 +97,33 @@ void Cpu::OP_STOP()
 
 void Cpu::OP_STR()
 {
-    std::vector<char> contents;
-    char c = -1;
-    pc++;
-    while(c != 0)
-    {
-        c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
-        contents.insert(contents.end(), c);
-        pc++;
-    }
-    auto memBlock = memcontroller.HeapAlloc(activeProgram, contents.size());
-    std::string str(contents.begin(), contents.end());
+    std::string str = buildString();
+    auto memBlock = memcontroller.HeapAlloc(activeProgram, str.size());
+
     memcontroller.StoreStringInHeap(memBlock, str);
     acc = memBlock.start;
     //pc++;
+}
+
+void Cpu::OP_STRCAT()
+{
+    std::string str = buildString();
+    HeapBlockHandler handle;
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start = xReg)
+        {
+            handle = i;
+            xReg = 0;
+            break;
+        }
+    }
+    std::string base = memcontroller.ReadStringFromHeap(handle);
+    base += str;
+    auto memBlock = memcontroller.HeapAlloc(activeProgram, base.size());
+
+    memcontroller.StoreStringInHeap(memBlock, base);
+    acc = memBlock.start;
 }
 
 void Cpu::OP_RSTR()
@@ -1052,6 +1065,9 @@ void Cpu::Decode()
     case(DELSTR):
         OP_DELSTR();
         break;
+    case (STRCAT):
+        OP_STRCAT();
+        break;
     default:
         UNDEFINED();
         break;
@@ -1349,4 +1365,35 @@ void Cpu::int4()
     }
     
     ExecuteProgram(activeProgram);
+}
+
+std::string Cpu::buildString()
+{
+    std::vector<char> contents;
+    char c = -1;
+    pc++;
+    while(c != 0)
+    {
+        c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
+        if(c == '\\')
+        {
+            c = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc+1])];
+            if(c == 'n')
+            contents.insert(contents.end(), '\n');
+            pc+=2;
+        }
+        else if (c == '_')
+        {
+            c = ' ';
+            contents.insert(contents.end(), c);
+            pc++;
+        }
+        else
+        {
+            contents.insert(contents.end(), c);
+            pc++;
+        }
+    }
+    std::string str(contents.begin(), contents.end());
+    return str;
 }

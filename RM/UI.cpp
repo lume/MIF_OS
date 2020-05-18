@@ -8,9 +8,6 @@ UI::UI(std::string programName, bool step)
     this->step = step;
 }
 
-UI::UI()
-{}
-
 void UI::Update()
 {
     if(step)

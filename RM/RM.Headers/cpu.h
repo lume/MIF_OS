@@ -128,6 +128,9 @@ class Cpu
         void OP_STR();
         void OP_RSTR();
         void OP_DELSTR();
+        void OP_STRCAT();
+
+        std::string buildString();
 
         int AddInternal(int x, int y);
         int MulInternal(int x, int y);

@@ -92,6 +92,7 @@ std::string undefinedLabel(char* label);
 #define STR_OPC 56
 #define RSTR_OPC 57
 #define DELSTR_OPC 58
+#define STRCAT_OPC 59
 
 // Instruction sizes
 #define STOP_SIZE 1
@@ -153,13 +154,14 @@ std::string undefinedLabel(char* label);
 #define STR_SIZE 2
 #define RSTR_SIZE 2
 #define DELSTR_SIZE 2
+#define STRCAT_SIZE 2
 
 // List of mnemonics
 const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "storea", "storer", "storev", "storep", "adda", "addi", "addr", 
 "suba", "subi", "subr", "mula", "muli", "mulr", "diva", "divi", "divr",
 "jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "mod", "push", "pop", "inc", "dec",
 "shl", "shr", "int", "anda", "andi", "andr", "ora", "ori", "orr", "xora", "xori", "xorr",
-"cmpa", "cmpi", "cmpr", "call", "ret", "var", "ptr", "ret", "str", "rstr", "delstr"};
+"cmpa", "cmpi", "cmpr", "call", "ret", "var", "ptr", "ret", "str", "rstr", "delstr", "strcat"};
 
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
@@ -355,7 +357,7 @@ void ParseMnemo(char* mnemo, char* line)
     if(opcode == STOP_OPC)
         stopFound = true;
     
-    if(opcode == STR_OPC)
+    if(opcode == STR_OPC || opcode == STRCAT_OPC)
     {
         //this is string, parse accordingly
         code.insert(code.end(), opcode);
@@ -617,6 +619,8 @@ int getOpcode(char* mnem)
         return RSTR_OPC;
     if(strcmp(mnem, "delstr") == 0)
         return DELSTR_OPC;
+    if(strcmp(mnem, "strcat") == 0)
+        return STRCAT_OPC;
     return 999;
 }
 
@@ -742,5 +746,7 @@ int getOpSize(char* mnem)
         return RSTR_SIZE;
     if(strcmp(mnem, "delstr") == 0)
         return DELSTR_SIZE;
+    if(strcmp(mnem, "strcat") == 0)
+        return STRCAT_SIZE;
     return 999;
 }

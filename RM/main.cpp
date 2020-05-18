@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     }
     else if(argc > 2)
     {
-        if(strcmp(argv[2], "step") == 0)
+        if(strcmp(argv[1], "step") == 0)
             step = true;
     }
 
@@ -26,11 +26,10 @@ int main(int argc, char** argv)
     }
 
     Cpu cpu = Cpu();
-    UI ui = UI(argv[1], step);
 
     Clock clock = Clock(cpu, step);
 
-    clock.Start(argv[1], ui);
+    clock.Start();
     clock.Update();
 
     return 0;
