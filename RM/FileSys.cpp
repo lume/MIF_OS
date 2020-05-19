@@ -3,12 +3,15 @@
 
 FileSystem::FileSystem()
 {
-    initializeFileIndex();
 }
 
-//TODO: rework this to return vector of prepared file descriptor strings
-fileDescriptor getFileByName(std::string name)
+std::string FileSystem::getFileDescriptorString(int index)
 {
+    initializeFileIndex();
+    fileDescriptor fd = fileIndex[index];
+    std::string str;
+    str += std::to_string(fd.type) + " " + fd.name + " " + std::to_string(fd.size);
+    return str;
 }
 
 FileSystem::~FileSystem()
@@ -17,7 +20,7 @@ FileSystem::~FileSystem()
 void FileSystem::initializeFileIndex()
 {
     IOControl io = IOControl();
-
+    fileIndex.clear();
     auto pieces = io.SplitDriveDataIntoProgramPieces();
     
     for(auto piece : pieces)

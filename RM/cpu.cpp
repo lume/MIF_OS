@@ -603,6 +603,12 @@ void Cpu::OP_INT()
         case 10:
             int10(); // print
             break;
+        case 30:
+            int30();
+            break;
+        case 31:
+            int31();
+            break;
         default:
             throw std::runtime_error("Bad interrupt");
     }
@@ -1390,6 +1396,20 @@ void Cpu::int5()
     auto memBlock = memcontroller.HeapAlloc(activeProgram, s.size());
     memcontroller.StoreStringInHeap(memBlock, s);
     acc = memBlock.start;
+}
+
+void Cpu::int30()
+{
+    std::string str = filesystem.getFileDescriptorString(acc);
+    auto memBlock = memcontroller.HeapAlloc(activeProgram, str.size());
+    memcontroller.StoreStringInHeap(memBlock, str);
+    acc = memBlock.start;
+}
+
+void Cpu::int31()
+{
+    filesystem.initializeFileIndex();
+    acc = fileIndex.size();
 }
 
 std::string Cpu::buildString()

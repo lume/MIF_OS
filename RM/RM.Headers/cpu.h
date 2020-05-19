@@ -154,4 +154,6 @@ class Cpu
         void int4();  // Execute process by Id
         void int5();  // getchar
         void int10(); // print
+        void int30(); // get file descriptor string
+        void int31(); // get file index size
 };
