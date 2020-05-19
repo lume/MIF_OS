@@ -21,15 +21,14 @@ label load
 loadv a
 storer x
 int 4
-jmp shellEnd
+jmp done
 
 label error
 str shell_not_found
 storer x
 int 10
-jmp shellEnd
 
-label shellEnd
+label done
 ret
 
 label helloworld

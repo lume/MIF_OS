@@ -1,6 +1,7 @@
 #pragma once 
 #include <string>
 #include <array>
+#include "FileSys.h"
 #include "memcontrol.h"
 
 
@@ -21,6 +22,7 @@ class Cpu
     public:
         Memcontrol memcontroller = Memcontrol();
         IOControl iocontroller = IOControl();
+        FileSystem filesystem = FileSystem();
         Program activeProgram;
 
         Cpu(){}

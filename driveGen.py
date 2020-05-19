@@ -14,8 +14,8 @@ def installPrograms(filenames: list()) -> None:
                 readData = subfile.read()
                 readDataList = readData.split();
                 
-                code = "1453 " + str(len(filename)+1) + " " + filenameOrd + str(len(readDataList)) + " " + readData
-                programsCode = programsCode + code
+                code = "1453 " + str(len(filename)+1) + " " + filenameOrd + str(len(readDataList)) + " " + readData + " -2 "
+                programsCode = programsCode + code 
         except FileNotFoundError:
             print(filename + " could not be found")
             pass
@@ -24,6 +24,7 @@ def installPrograms(filenames: list()) -> None:
         for i in programsCode.split():
             driveFile.write(i + " ")
             freeMem = freeMem - 1
+        freeMem = freeMem - 1
         for j in range(freeMem):
             driveFile.write("-1 ")
 

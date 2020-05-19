@@ -137,14 +137,6 @@ std::fstream& IOControl::GotoLine(std::fstream& file, int lineNum)
 
 std::vector<int> IOControl::FindProgramCode(std::string programName)
 {
-    /*
-    1. load drive data into vector
-    2. look for '1453'
-    3. compare namelens
-    4. if equal, compare names
-    5. if equal, read machinecode into new vector
-    6. return machinecode
-    */  
     int dat;
     std::vector<int> driveData;
     std::ifstream file(DRIVE);
@@ -195,4 +187,39 @@ std::vector<int> IOControl::FindProgramCode(std::string programName)
     }   
 
     return code;
+}
+
+std::vector<std::vector<int>> IOControl::SplitDriveDataIntoProgramPieces()
+{
+    int dat;
+    std::vector<int> driveData;
+    std::ifstream file(DRIVE);
+    pthread_mutex_lock(&swapMutex);
+    if(file.is_open())
+    {
+        while(file >> dat)
+        {
+            driveData.insert(driveData.end(), dat);
+        }
+        file.close();
+    } 
+    pthread_mutex_unlock(&swapMutex);
+
+    std::vector<std::vector<int>> programPieces;
+
+    bool fileStarted = false;
+    std::vector<int> programPiece;
+    for(int i : driveData)
+    {
+        
+        if(i == -2)
+        {
+            programPieces.insert(programPieces.end(), programPiece);
+            programPiece.clear();
+        }
+        else if(i != -1)
+            programPiece.insert(programPiece.end(), i);
+    }
+
+    return programPieces;
 }

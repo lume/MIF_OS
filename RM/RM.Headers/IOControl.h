@@ -38,6 +38,8 @@ class IOControl
         void InitCharBuffer();
 
         std::vector<int> FindProgramCode(std::string programName);
+        std::vector<std::vector<int>> SplitDriveDataIntoProgramPieces();
+         
     private:
         static void* WriteSwapDataInternal(void* arg);
         static void* ReadSwapDataInternal(void* arg); // returns an array of data from a disk
