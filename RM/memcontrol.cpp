@@ -77,6 +77,7 @@ int Memcontrol::FindLeastAccessedPage(std::vector<int> collectedPages)
             page = i;
         }
     }
+
  
     return page;
 }
@@ -466,10 +467,30 @@ std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
 int Memcontrol::ForkProcess(std::string programName, Program program)
 {
     Process process;
+    if(activeProcessId != -1)
+        process.parent = processList[activeProcessId].id;
     process.name = programName;
     process.program = program;
     process.status = 1;
+    process.id = processList.size();
+    if(activeProcessId != -1)
+        processList[activeProcessId].childProcesses.insert(processList[activeProcessId].childProcesses.end(), process);
+    if(process.id == -1)
+    {
+        process.parent = -1;
+        process.id = 0;
+    }
     processList.insert(processList.end(), process);
-    process.id = processList.size()-1;
+    
     return process.id;
+}
+
+void Memcontrol::StopCurrentProcess()
+{
+    processList[activeProcessId].status = 0;
+    for(auto p : processList[activeProcessId].childProcesses)
+    {
+        p.status = 2;
+    }
+    activeProcessId = processList[activeProcessId].parent;
 }

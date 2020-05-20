@@ -85,12 +85,15 @@ void Cpu::OP_STOP()
     if(xReg == 9000 && cReg == 9000)
     {
         std::cout <<"\nMachine shutting down...\n";
-        exit(0);
+        fs |= ef;
     }
     else
     {
         //TODO: kill current process, return to parent process
-        fs |= ef;
+        //fs |= ef;
+        memcontroller.StopCurrentProcess();
+        activeProgram = processList[memcontroller.activeProcessId].program;   
+        SetFromSnapshot(activeProgram.cpuSnapshot);
     }
 }
 
@@ -1252,9 +1255,9 @@ Program Cpu::ExecuteProgram(Program program, int cycles)
     activeProgram.cpuSnapshot = SaveToSnapshot();
     if(!((fs & ef) == 0))
     {
-        memcontroller.FreeMemory(activeProgram.codeSegment.memory);
-        memcontroller.FreeMemory(activeProgram.stackSegment.memory);
-        memcontroller.FreeMemory(activeProgram.dataSegment.memory);
+        //memcontroller.FreeMemory(activeProgram.codeSegment.memory);
+        //memcontroller.FreeMemory(activeProgram.stackSegment.memory);
+        //memcontroller.FreeMemory(activeProgram.dataSegment.memory);
     }
 
     return activeProgram;
@@ -1367,7 +1370,7 @@ void Cpu::int3()
 void Cpu::int4()
 {
     int processId = xReg;
-    if(memcontroller.activeProcessId == -1)
+    /*if(memcontroller.activeProcessId == -1)
     {
         memcontroller.activeProcessId = processId;
         activeProgram = processList[memcontroller.activeProcessId].program;
@@ -1378,7 +1381,13 @@ void Cpu::int4()
         processList[memcontroller.activeProcessId].program.cpuSnapshot = snap;
         memcontroller.activeProcessId = processId;
         activeProgram = processList[memcontroller.activeProcessId].program;
-    }
+    }*/
+
+    pc++;
+    auto snap = SaveToSnapshot();
+    processList[memcontroller.activeProcessId].program.cpuSnapshot = snap;
+    memcontroller.activeProcessId = processId;
+    activeProgram = processList[memcontroller.activeProcessId].program;
     
     ExecuteProgram(activeProgram);
 }

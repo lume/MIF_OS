@@ -59,7 +59,8 @@ struct Process
     int id;
     std::string name;
     Program program;
-    std::vector<int> childProcesses;
+    int parent;
+    std::vector<Process> childProcesses;
     int status; // 0 dead 1 alive 2 zombie
 };
 
@@ -111,6 +112,7 @@ class Memcontrol
         std::string ReadStringFromHeap(HeapBlockHandler handler);
 
         int ForkProcess(std::string programName, Program program); //returns new process id
+        void StopCurrentProcess(); // stops current process and sets it's parent process as active
 
     private:
         std::vector<int> freeFramePool;
