@@ -137,21 +137,8 @@ std::fstream& IOControl::GotoLine(std::fstream& file, int lineNum)
 
 std::vector<int> IOControl::FindProgramCode(std::string programName)
 {
-    int dat;
-    std::vector<int> driveData;
-    std::ifstream file(DRIVE);
-    pthread_mutex_lock(&swapMutex);
-    if(file.is_open())
-    {
-        while(file >> dat)
-        {
-            driveData.insert(driveData.end(), dat);
-        }
-        file.close();
-    } 
-    pthread_mutex_unlock(&swapMutex);
+    auto driveData = readAllDriveData();
 
-    //TODO: refactor
     int targetCodeLocation = -1;
     int iter = 0;
     int targetCodeSize = 0;
@@ -189,7 +176,7 @@ std::vector<int> IOControl::FindProgramCode(std::string programName)
     return code;
 }
 
-std::vector<std::vector<int>> IOControl::SplitDriveDataIntoProgramPieces()
+std::vector<int> IOControl::readAllDriveData()
 {
     int dat;
     std::vector<int> driveData;
@@ -204,6 +191,39 @@ std::vector<std::vector<int>> IOControl::SplitDriveDataIntoProgramPieces()
         file.close();
     } 
     pthread_mutex_unlock(&swapMutex);
+
+    return driveData;
+}
+
+bool IOControl::modifyDriveData(std::vector<int> newData)
+{
+    std::ofstream file(DRIVE);
+    file.clear();
+    int s = 5000;
+    pthread_mutex_lock(&swapMutex);
+    for(auto dat : newData)
+    {
+        if(s < 0)
+            return false;
+        
+        std::string str = std::to_string(dat);
+        str.append(" ");
+        file.write(str.c_str(), str.length());
+        s--;
+    }
+
+    for(int i = 0; i < s; i++)
+    {
+        file.write("-1 ", 3);
+    }
+    file.close();
+    pthread_mutex_unlock(&swapMutex);
+    return true;
+}
+
+std::vector<std::vector<int>> IOControl::SplitDriveDataIntoProgramPieces()
+{
+    auto driveData = readAllDriveData();
 
     std::vector<std::vector<int>> programPieces;
 

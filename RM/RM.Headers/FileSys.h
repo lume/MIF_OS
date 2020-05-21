@@ -20,7 +20,7 @@ class FileSystem
 
         std::string getFileDescriptorString(int index);
         bool createNewFile(fileDescriptor file); // TODO: add interrupt for that
-        fileDescriptor generateNewDescriptor(); // TODO: add interupt for that
+        int generateNewDescriptor(std::string filename); // TODO: add interupt for that
         bool deleteFile(fileDescriptor file); // TODO: add interrupt for that
         bool modifyFile(fileDescriptor file); // TODO: Add interrrupt for that
         bool pipeToFile(fileDescriptor file, std::vector<int> data); // TODO: add interrupt for that
@@ -28,4 +28,5 @@ class FileSystem
         void initializeFileIndex(); // call if after each drive modification
 
     private:
+        int getIndexByName(std::string filename);
 };

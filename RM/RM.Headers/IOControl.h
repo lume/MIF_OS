@@ -37,6 +37,9 @@ class IOControl
         void InitDisk();
         void InitCharBuffer();
 
+        std::vector<int> readAllDriveData();
+        bool modifyDriveData(std::vector<int> newData);
+
         std::vector<int> FindProgramCode(std::string programName);
         std::vector<std::vector<int>> SplitDriveDataIntoProgramPieces();
          

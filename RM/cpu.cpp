@@ -606,6 +606,18 @@ void Cpu::OP_INT()
         case 10:
             int10(); // print
             break;
+        case 15:
+            int15();
+            break;
+        case 16:
+            int16();
+            break;
+        case 17:
+            int17();
+            break;
+        case 18:
+            int18();
+            break;
         case 30:
             int30();
             break;
@@ -1370,19 +1382,6 @@ void Cpu::int3()
 void Cpu::int4()
 {
     int processId = xReg;
-    /*if(memcontroller.activeProcessId == -1)
-    {
-        memcontroller.activeProcessId = processId;
-        activeProgram = processList[memcontroller.activeProcessId].program;
-    }
-    else
-    {
-        auto snap = SaveToSnapshot();
-        processList[memcontroller.activeProcessId].program.cpuSnapshot = snap;
-        memcontroller.activeProcessId = processId;
-        activeProgram = processList[memcontroller.activeProcessId].program;
-    }*/
-
     pc++;
     auto snap = SaveToSnapshot();
     processList[memcontroller.activeProcessId].program.cpuSnapshot = snap;
@@ -1420,6 +1419,27 @@ void Cpu::int31()
     filesystem.initializeFileIndex();
     acc = fileIndex.size();
 }
+
+void Cpu::int15()
+{
+    HeapBlockHandler handle;
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start = xReg)
+        {
+            handle = i;
+            xReg = 0;
+            break;
+        }
+    }
+    std::string filename = memcontroller.ReadStringFromHeap(handle);
+    int fdIndex = filesystem.generateNewDescriptor(filename);
+    acc = fdIndex;
+}
+
+void Cpu::int16(){}
+void Cpu::int17(){}
+void Cpu::int18(){}
 
 std::string Cpu::buildString()
 {
