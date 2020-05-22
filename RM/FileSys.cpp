@@ -73,7 +73,8 @@ bool FileSystem::modifyFile(std::string filename, std::string newFilename)
     IOControl control;
     initializeFileIndex();
     int indexToModify = getIndexByName(filename);
-    if(indexToModify == -3)
+    int temp = getIndexByName(newFilename);
+    if(indexToModify == -3 || temp != -3)
         return false;
     
     fileIndex[indexToModify].name = newFilename;

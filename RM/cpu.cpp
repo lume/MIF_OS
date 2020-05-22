@@ -10,6 +10,8 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <iterator>
+
 
 //#define RAM memcontroller.RAM
 
@@ -1363,6 +1365,12 @@ void Cpu::int3()
         //return;
     }
     std::string str = memcontroller.ReadStringFromHeap(handle);
+
+    std::istringstream iss(str);
+    std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+                                std::istream_iterator<std::string>{}};
+
+
     //Create program
     auto code = iocontroller.FindProgramCode(str);
     if(code.size() == 0)
@@ -1373,7 +1381,7 @@ void Cpu::int3()
     {
         auto program = LoadProgram(code); 
         
-        acc = memcontroller.ForkProcess(str, program);
+        acc = memcontroller.ForkProcess(tokens, program);
 
         cReg = 0;
     }

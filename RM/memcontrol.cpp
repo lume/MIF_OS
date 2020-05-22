@@ -465,12 +465,13 @@ std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
     return str;
 }
 
-int Memcontrol::ForkProcess(std::string programName, Program program)
+int Memcontrol::ForkProcess(std::vector<std::string> args, Program program)
 {
     Process process;
+    args.insert(args.end(), args[0]);
     if(activeProcessId != -1)
         process.parent = processList[activeProcessId].id;
-    process.name = programName;
+    process.name = args[0];
     process.program = program;
     process.status = 1;
     process.id = processList.size();
@@ -481,6 +482,8 @@ int Memcontrol::ForkProcess(std::string programName, Program program)
         process.parent = -1;
         process.id = 0;
     }
+    process.args = args;
+
     processList.insert(processList.end(), process);
     
     return process.id;
