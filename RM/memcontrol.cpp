@@ -468,7 +468,6 @@ std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
 int Memcontrol::ForkProcess(std::vector<std::string> args, Program program)
 {
     Process process;
-    args.insert(args.end(), args[0]);
     if(activeProcessId != -1)
         process.parent = processList[activeProcessId].id;
     process.name = args[0];

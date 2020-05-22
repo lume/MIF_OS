@@ -160,4 +160,6 @@ class Cpu
         void int18(); // write into file
         void int30(); // get file descriptor string
         void int31(); // get file index size
+        void int35(); // get count of args
+        void int36(); // get arg by given index
 };

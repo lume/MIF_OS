@@ -73,6 +73,8 @@ bool FileSystem::modifyFile(std::string filename, std::string newFilename)
     IOControl control;
     initializeFileIndex();
     int indexToModify = getIndexByName(filename);
+    if(fileIndex[indexToModify].type != 1454)
+        return false;
     int temp = getIndexByName(newFilename);
     if(indexToModify == -3 || temp != -3)
         return false;
@@ -138,7 +140,8 @@ bool FileSystem::deleteFile(std::string filename)
     IOControl control;
     initializeFileIndex();
     int indexToRemove = getIndexByName(filename);
-    if(indexToRemove == -3)
+    
+    if(indexToRemove == -3 || fileIndex[indexToRemove].type != 1454)
         return false;
         
     fileIndex.erase(fileIndex.begin() + indexToRemove);

@@ -394,7 +394,9 @@ void Cpu::OP_DIVR()
 void Cpu::OP_JZ()
 {
     pc++;
-    if(fs & zf)
+    int a = fs&zf;
+
+    if(a==2)
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
@@ -409,7 +411,8 @@ void Cpu::OP_JZ()
 void Cpu::OP_JNZ()
 {
     pc++;
-    if(fs & zf == 0)
+    int a = fs&zf;
+    if(a != 2)
     {
         uint8_t offset = RAM[memcontroller.ConvertToPhysAddress(activeProgram.codeSegment.memory.addresses[pc])];
         pc++;
@@ -419,6 +422,7 @@ void Cpu::OP_JNZ()
     {
         pc++;
     }
+    fs ^= zf;
 }
 
 void Cpu::OP_JL()
@@ -625,6 +629,12 @@ void Cpu::OP_INT()
             break;
         case 31:
             int31();
+            break;
+        case 35:
+            int35();
+            break;
+        case 36:
+            int36();
             break;
         default:
             throw std::runtime_error("Bad interrupt");
@@ -1370,9 +1380,24 @@ void Cpu::int3()
     std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
                                 std::istream_iterator<std::string>{}};
 
+    std::vector<int> code;
+    if(tokens.size() > 1)
+    {
+        std::vector<std::string> newTok;
+        int i = 0;
+        for(auto s : tokens)
+        {
+            if(i < tokens.size()-1)
+                newTok.insert(newTok.end(), s+'\0');
+            i++;
+        }
+        code = iocontroller.FindProgramCode(newTok[0]);
+    }
+    else{
+        code = iocontroller.FindProgramCode(tokens[0]);
+    }
 
     //Create program
-    auto code = iocontroller.FindProgramCode(str);
     if(code.size() == 0)
     {
         cReg = -1;
@@ -1499,6 +1524,24 @@ void Cpu::int17(){
 }
 
 void Cpu::int18(){}
+
+void Cpu::int35(){
+    acc = processList[memcontroller.activeProcessId].args.size();
+}
+
+void Cpu::int36(){
+    if(acc < processList[memcontroller.activeProcessId].args.size())
+    {
+        std::string str = processList[memcontroller.activeProcessId].args[acc];
+        auto memBlock = memcontroller.HeapAlloc(activeProgram, str.size());
+
+        memcontroller.StoreStringInHeap(memBlock, str);
+        xReg = memBlock.start;
+    }
+    else{
+        acc = -1;
+    }
+}
 
 std::string Cpu::buildString()
 {
