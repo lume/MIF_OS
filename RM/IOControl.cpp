@@ -170,7 +170,10 @@ std::vector<int> IOControl::FindProgramCode(std::string programName)
     std::vector<int> code;
     for(int i = 0; i < targetCodeSize; i++)
     {
-        code.insert(code.end(), driveData[targetCodeLocation+i]);
+        if(driveData[targetCodeLocation+i] != -2)
+            code.insert(code.end(), driveData[targetCodeLocation+i]);
+        else
+            break;
     }   
 
     return code;
@@ -197,8 +200,8 @@ std::vector<int> IOControl::readAllDriveData()
 
 bool IOControl::modifyDriveData(std::vector<int> newData)
 {
-    std::ofstream file(DRIVE);
-    file.clear();
+    std::ofstream file;
+    file.open(DRIVE, std::ofstream::out | std::ofstream::trunc);
     int s = 5000;
     pthread_mutex_lock(&swapMutex);
     for(auto dat : newData)

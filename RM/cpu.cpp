@@ -1351,7 +1351,7 @@ void Cpu::int3()
     handle.size = -1;
     for(auto i : HeapBlockHandlers)
     {
-        if(i.start = cReg)
+        if(i.start == cReg)
         {
             handle = i;
             break;
@@ -1425,7 +1425,7 @@ void Cpu::int15()
     HeapBlockHandler handle;
     for(auto i : HeapBlockHandlers)
     {
-        if(i.start = xReg)
+        if(i.start == xReg)
         {
             handle = i;
             xReg = 0;
@@ -1441,7 +1441,7 @@ void Cpu::int16(){
     HeapBlockHandler handle;
     for(auto i : HeapBlockHandlers)
     {
-        if(i.start = xReg)
+        if(i.start == xReg)
         {
             handle = i;
             xReg = 0;
@@ -1461,7 +1461,7 @@ void Cpu::int17(){
     HeapBlockHandler handle;
     for(auto i : HeapBlockHandlers)
     {
-        if(i.start = xReg)
+        if(i.start == xReg)
         {
             handle = i;
             xReg = 0;
@@ -1470,12 +1470,13 @@ void Cpu::int17(){
     }
     std::string filename = memcontroller.ReadStringFromHeap(handle);
 
+
     for(auto i : HeapBlockHandlers)
     {
-        if(i.start = cReg)
+        if(i.start == cReg)
         {
             handle = i;
-            xReg = 0;
+            cReg = 0;
             break;
         }
     }
