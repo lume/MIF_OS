@@ -1334,7 +1334,7 @@ void Cpu::int10()
     HeapBlockHandler handle;
     for(auto i : HeapBlockHandlers)
     {
-        if(i.start = xReg)
+        if(i.start == xReg)
         {
             handle = i;
             xReg = 0;
@@ -1437,8 +1437,58 @@ void Cpu::int15()
     acc = fdIndex;
 }
 
-void Cpu::int16(){}
-void Cpu::int17(){}
+void Cpu::int16(){
+    HeapBlockHandler handle;
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start = xReg)
+        {
+            handle = i;
+            xReg = 0;
+            break;
+        }
+    }
+    std::string filename = memcontroller.ReadStringFromHeap(handle);
+    bool result = filesystem.deleteFile(filename);
+
+    if(result)
+        acc = 0;
+    else
+        acc = 1;
+}
+
+void Cpu::int17(){
+    HeapBlockHandler handle;
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start = xReg)
+        {
+            handle = i;
+            xReg = 0;
+            break;
+        }
+    }
+    std::string filename = memcontroller.ReadStringFromHeap(handle);
+
+    for(auto i : HeapBlockHandlers)
+    {
+        if(i.start = cReg)
+        {
+            handle = i;
+            xReg = 0;
+            break;
+        }
+    }
+    std::string newFilename = memcontroller.ReadStringFromHeap(handle);
+    
+    bool result = filesystem.modifyFile(filename, newFilename);
+
+    if(result)
+        acc = 0;
+    else
+        acc = 1;
+}
+
 void Cpu::int18(){}
 
 std::string Cpu::buildString()

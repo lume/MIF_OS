@@ -1,6 +1,8 @@
 #include "FileSys.h"
 #include "IOControl.h"
 
+#include <algorithm>
+
 FileSystem::FileSystem()
 {
 }
@@ -18,6 +20,12 @@ int FileSystem::generateNewDescriptor(std::string filename)
 {
     IOControl control = IOControl();
     auto data = control.readAllDriveData();
+
+    int index = getIndexByName(filename);
+    if(index != -3)
+    {
+        return -3;
+    }
 
     std::vector<int> strippedData;
     for(int i : data)
@@ -60,8 +68,37 @@ int FileSystem::generateNewDescriptor(std::string filename)
 FileSystem::~FileSystem()
 {}
 
+bool FileSystem::modifyFile(std::string filename, std::string newFilename)
+{
+    IOControl control;
+    initializeFileIndex();
+    int indexToModify = getIndexByName(filename);
+    if(indexToModify == -3)
+        return false;
+    
+    fileIndex[indexToModify].name = newFilename;
+
+    std::vector<int> codeToModify;
+    for(auto indexFd : fileIndex)
+    {
+        auto fdCode = getFileDescriptorCode(indexFd);
+        auto code = control.FindProgramCode(indexFd.name);
+        codeToModify.insert(codeToModify.end(),
+        fdCode.begin(), fdCode.end());
+        codeToModify.insert(codeToModify.end(),
+        code.begin(), code.end());
+        codeToModify.insert(codeToModify.end(), -2);
+
+    }
+    control.modifyDriveData(codeToModify);
+
+    initializeFileIndex();
+    return true;
+}
+
 int FileSystem::getIndexByName(std::string filename)
 {
+    initializeFileIndex();
     int i = 0;
     for(auto ind : fileIndex)
     {
@@ -94,3 +131,43 @@ void FileSystem::initializeFileIndex()
         fileIndex.insert(fileIndex.end(), fd);
     }
 }   
+
+bool FileSystem::deleteFile(std::string filename)
+{
+    IOControl control;
+    initializeFileIndex();
+    int indexToRemove = getIndexByName(filename);
+    if(indexToRemove == -3)
+        return false;
+        
+    fileIndex.erase(fileIndex.begin() + indexToRemove);
+    std::vector<int> codeToModify;
+    for(auto indexFd : fileIndex)
+    {
+        auto fdCode = getFileDescriptorCode(indexFd);
+        auto code = control.FindProgramCode(indexFd.name);
+        codeToModify.insert(codeToModify.end(),
+        fdCode.begin(), fdCode.end());
+        codeToModify.insert(codeToModify.end(),
+        code.begin(), code.end());
+        codeToModify.insert(codeToModify.end(), -2);
+
+    }
+    control.modifyDriveData(codeToModify);
+
+    initializeFileIndex();
+    return true;
+}
+
+std::vector<int> FileSystem::getFileDescriptorCode(fileDescriptor fd)
+{
+    std::vector<int> code;
+    code.insert(code.end(), fd.type);
+    code.insert(code.end(), fd.name.length());
+    for(char c : fd.name)
+    {
+        code.insert(code.end(), (int)c);
+    }
+    code.insert(code.end(), fd.size);
+    return code;
+}

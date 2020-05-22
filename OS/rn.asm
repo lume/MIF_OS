@@ -1,5 +1,9 @@
 str testfile
 storer x
-int 15
+
+str aaa
+storer c
+
+int 17
 
 stop

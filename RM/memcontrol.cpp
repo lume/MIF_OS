@@ -442,7 +442,8 @@ void Memcontrol::StoreStringInHeap(HeapBlockHandler handler, std::string str)
     int memstart = handler.start;
     for(int i = 0; i < str.length(); i++)
     {
-        RAM[memstart+i] = str[i];
+        int valToStore = str[i];
+        RAM[memstart+i] = valToStore;
     }
     RAM[memstart+str.length()+1] = 0;
 }
