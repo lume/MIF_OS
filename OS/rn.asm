@@ -20,13 +20,13 @@ label error_not_enough
 str usage:_[old_filename]_[new_filename]
 storer x
 int 10
-jmp end
+jmp end1
 
 label error
 str could_not_rename
 storer x
 int 10
-jmp end
 
+label end1
 label end
 stop

@@ -630,6 +630,12 @@ void Cpu::OP_INT()
         case 31:
             int31();
             break;
+        case 32:
+            int32();
+            break;
+        case 33:
+            int33();
+            break;
         case 35:
             int35();
             break;
@@ -1182,7 +1188,7 @@ Program Cpu::LoadProgram(std::vector<int> programCode)
 
 Program Cpu::LoadBootloader()
 {
-    auto code = iocontroller.FindProgramCode("bootl");
+    auto code = iocontroller.FindProgramCode("bootl", 1453);
     Program program = LoadProgram(code);
     activeProgram = program;
     return activeProgram;
@@ -1381,6 +1387,10 @@ void Cpu::int3()
                                 std::istream_iterator<std::string>{}};
 
     std::vector<int> code;
+
+    int keyword = 1453;
+    if(acc == 1454)
+        keyword = 1454;
     if(tokens.size() > 1)
     {
         std::vector<std::string> newTok;
@@ -1391,10 +1401,10 @@ void Cpu::int3()
                 newTok.insert(newTok.end(), s+'\0');
             i++;
         }
-        code = iocontroller.FindProgramCode(newTok[0]);
+        code = iocontroller.FindProgramCode(newTok[0], keyword);
     }
     else{
-        code = iocontroller.FindProgramCode(tokens[0]);
+        code = iocontroller.FindProgramCode(tokens[0], keyword);
     }
 
     //Create program
@@ -1447,10 +1457,23 @@ void Cpu::int30()
     acc = memBlock.start;
 }
 
+void Cpu::int33()
+{
+    std::string str = memcontroller.getProcessInfoString(acc);
+    auto memBlock = memcontroller.HeapAlloc(activeProgram, str.size());
+    memcontroller.StoreStringInHeap(memBlock, str);
+    acc = memBlock.start;
+}
+
 void Cpu::int31()
 {
     filesystem.initializeFileIndex();
     acc = fileIndex.size();
+}
+
+void Cpu::int32()
+{
+    acc = processList.size();
 }
 
 void Cpu::int15()

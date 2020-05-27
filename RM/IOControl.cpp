@@ -135,7 +135,7 @@ std::fstream& IOControl::GotoLine(std::fstream& file, int lineNum)
     return file;
 }
 
-std::vector<int> IOControl::FindProgramCode(std::string programName)
+std::vector<int> IOControl::FindProgramCode(std::string programName, int keywordToSearch)
 {
     auto driveData = readAllDriveData();
 
@@ -144,7 +144,7 @@ std::vector<int> IOControl::FindProgramCode(std::string programName)
     int targetCodeSize = 0;
     for(auto i : driveData)
     {
-        if(i == 1453)
+        if(i == keywordToSearch)
         {
             int x = programName.size();
             int y = driveData[iter+1];

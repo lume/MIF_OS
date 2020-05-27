@@ -151,7 +151,8 @@ class Cpu
         bool ParityCheck();
 
         void int3();  // Load program from disk
-        void int4();  // Execute process by Id
+        void int4();  // Execute kernel process by Id
+        void int6();  // Load non-kernel program
         void int5();  // getchar
         void int10(); // print
         void int15(); // create file
@@ -160,6 +161,8 @@ class Cpu
         void int18(); // write into file
         void int30(); // get file descriptor string
         void int31(); // get file index size
+        void int32(); // get process index size
+        void int33(); // get process info string
         void int35(); // get count of args
         void int36(); // get arg by given index
 };

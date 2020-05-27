@@ -497,3 +497,18 @@ void Memcontrol::StopCurrentProcess()
     }
     activeProcessId = processList[activeProcessId].parent;
 }
+
+std::string Memcontrol::getProcessInfoString(int index)
+{
+    Process p = processList[index];
+    std::string str;
+    std::string status;
+    if(p.status == 1)
+        status = "ALIVE";
+    else if(p.status == 0)
+        status = "DEAD";
+    else 
+        status = "ZOMBIE";
+    str += std::to_string(p.id) + " " + p.name + " " + status;
+    return str;
+}

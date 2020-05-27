@@ -85,7 +85,7 @@ bool FileSystem::modifyFile(std::string filename, std::string newFilename)
     for(auto indexFd : fileIndex)
     {
         auto fdCode = getFileDescriptorCode(indexFd);
-        auto code = control.FindProgramCode(indexFd.name);
+        auto code = control.FindProgramCode(indexFd.name, indexFd.type);
         codeToModify.insert(codeToModify.end(),
         fdCode.begin(), fdCode.end());
         codeToModify.insert(codeToModify.end(),
@@ -149,7 +149,7 @@ bool FileSystem::deleteFile(std::string filename)
     for(auto indexFd : fileIndex)
     {
         auto fdCode = getFileDescriptorCode(indexFd);
-        auto code = control.FindProgramCode(indexFd.name);
+        auto code = control.FindProgramCode(indexFd.name, indexFd.type);
         codeToModify.insert(codeToModify.end(),
         fdCode.begin(), fdCode.end());
         codeToModify.insert(codeToModify.end(),

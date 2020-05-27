@@ -115,6 +115,7 @@ class Memcontrol
 
         int ForkProcess(std::vector<std::string> args, Program program); //returns new process id
         void StopCurrentProcess(); // stops current process and sets it's parent process as active
+        std::string getProcessInfoString(int index);
 
     private:
         std::vector<int> freeFramePool;
