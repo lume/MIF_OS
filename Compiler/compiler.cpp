@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <iterator>
+#include <functional>
 
 char CheckIfMnemo(char* str);
 char CheckIfDirct(char* str);
@@ -87,6 +88,11 @@ std::string undefinedLabel(char* label);
 #define JO_OPC 52
 #define JP_OPC 53
 #define JC_OPC 54
+#define RET_OPC 55
+#define STR_OPC 56
+#define RSTR_OPC 57
+#define DELSTR_OPC 58
+#define STRCAT_OPC 59
 
 // Instruction sizes
 #define STOP_SIZE 1
@@ -144,13 +150,18 @@ std::string undefinedLabel(char* label);
 #define JO_SIZE 2
 #define JC_SIZE 2
 #define JP_SIZE 2
+#define RET_SIZE 1
+#define STR_SIZE 2
+#define RSTR_SIZE 2
+#define DELSTR_SIZE 2
+#define STRCAT_SIZE 2
 
 // List of mnemonics
 const char* mnems[] = {"stop", "loada", "loadi", "loadr", "loadv", "loadp", "storea", "storer", "storev", "storep", "adda", "addi", "addr", 
 "suba", "subi", "subr", "mula", "muli", "mulr", "diva", "divi", "divr",
 "jz", "jnz", "jl", "jle", "jg", "jge", "jmp", "mod", "push", "pop", "inc", "dec",
 "shl", "shr", "int", "anda", "andi", "andr", "ora", "ori", "orr", "xora", "xori", "xorr",
-"cmpa", "cmpi", "cmpr", "call", "var", "ptr"};
+"cmpa", "cmpi", "cmpr", "call", "ret", "var", "ptr", "ret", "str", "rstr", "delstr", "strcat"};
 
 int mnemLen = sizeof(mnems)/sizeof(mnems[0]);
 
@@ -165,6 +176,8 @@ int dirctLen = sizeof(dircts)/sizeof(dircts[0]);
 uint32_t src_counter = 0; // position from which the code starts
 std::vector<int> code;  // code segment
 std::map<std::string, int> labels;
+
+bool stopFound = false;
 
 std::vector<int> CompileToMemory(char* sourceFile)
 {
@@ -209,22 +222,21 @@ std::vector<int> CompileToMemory(char* sourceFile)
 
     // Closing operation
     fclose(stream);
-   /* printf("\n\nFinal compilation result: \n");
+    printf("\n\nFinal compilation result: \n");
     printf("[");
         std::for_each(code.begin(), code.end(),[](int i){
             printf("%d,", i);
         });
-    printf("]");*/
+    printf("]");
     return code;
 }
 
 void CompileToFile(char* sourceFile, std::string output)
 {
     std::vector<int> machineCode = CompileToMemory(sourceFile);
-    if(machineCode[machineCode.size()-1] != 0)
+    if(!stopFound)
     {
-        std::cout << "\nThe program has no stop at the end! compilation failed\n" << std::endl;
-        exit(-1);
+        std::cout << "\nWarning: the program has no stop\n" << std::endl;
     } 
     std::ofstream ofile(output);
 
@@ -292,7 +304,7 @@ void ParseMnemo(char* mnemo, char* line)
             {
                 //not found
                 
-                labels.insert({jumpTarget, 0});
+                labels.insert({jumpTarget, -1});
 
                 std::string undefLabel = undefinedLabel(jumpTarget);
                 std::cout << undefLabel << std::endl;
@@ -307,11 +319,15 @@ void ParseMnemo(char* mnemo, char* line)
                     code.insert(code.end(), undefLabel[i]);
                 }*/
 
-                std::stringstream str;
+                /*std::stringstream str;
                 str << jumpTarget;
                 int val;
                 str >> std::hex >> val;
-                code.insert(code.end(), val);
+                code.insert(code.end(), val);*/
+                std::string stringToHash(jumpTarget);
+                std::hash<std::string> hasher;
+                auto hashed = hasher(stringToHash);
+                code.insert(code.end(), (int)hashed);
 
                 /*printf("[");
                 std::for_each(code.begin(), code.end(),[](int i){
@@ -338,6 +354,25 @@ void ParseMnemo(char* mnemo, char* line)
     //
     // This is not a jump
     int opcode = getOpcode(mnemToken);
+    if(opcode == STOP_OPC)
+        stopFound = true;
+    
+    if(opcode == STR_OPC || opcode == STRCAT_OPC)
+    {
+        //this is string, parse accordingly
+        code.insert(code.end(), opcode);
+        char* arg = strtok(NULL, delim);
+        std::string s(arg);
+        for(int i = 0; i < s.length(); i++)
+        {
+            int x = (int)s[i];
+            code.insert(code.end(), x);
+        }
+        code.insert(code.end(), 0);
+        src_counter += s.length() + 2;
+        return;
+    }
+
     code.insert(code.end(), opcode);
     int opsize = getOpSize(mnemToken);
     if(opsize > 1)
@@ -357,11 +392,11 @@ void ParseMnemo(char* mnemo, char* line)
     }
     src_counter += opsize;
 
-    /* printf("[");
+     printf("[");
         std::for_each(code.begin(), code.end(),[](int i){
             printf("%d,", i);
         });
-    printf("]");*/
+    printf("]");
     return;
 }   
 
@@ -401,17 +436,21 @@ void compile_LABEL(char* line)
             std::cout << it->first << " " << it->second << std::endl; 
         }
     }
-    else if(labels[paramToken] == 0)
+    else if(labels[paramToken] == -1)
     {
-        std::stringstream str;
+        std::string stringToHash(paramToken);
+        std::hash<std::string> hasher;
+        auto hashed = hasher(stringToHash);
+
+        /*std::stringstream str;
         str << paramToken;
         int val;
-        str >> std::hex >> val;
+        str >> std::hex >> val;*/
         std::vector<int> positionsToChange;
         labels[paramToken] =  src_counter;
         for(int i = 0; i < code.size(); i++)
         {
-            if(code[i] == val)
+            if(code[i] == (int)hashed)
                 positionsToChange.insert(positionsToChange.end(), i);
         }
 
@@ -572,6 +611,16 @@ int getOpcode(char* mnem)
         return JO_OPC;
     if(strcmp(mnem, "jc") == 0)
         return JC_OPC;
+    if(strcmp(mnem, "ret") == 0)
+        return RET_OPC;
+    if(strcmp(mnem, "str") == 0)
+        return STR_OPC;
+    if(strcmp(mnem, "rstr") == 0)
+        return RSTR_OPC;
+    if(strcmp(mnem, "delstr") == 0)
+        return DELSTR_OPC;
+    if(strcmp(mnem, "strcat") == 0)
+        return STRCAT_OPC;
     return 999;
 }
 
@@ -689,5 +738,15 @@ int getOpSize(char* mnem)
         return VAR_SIZE;
     if(strcmp(mnem, "ptr") == 0)
         return PTR_SIZE;
+    if(strcmp(mnem, "ret") == 0)
+        return RET_SIZE;
+    if(strcmp(mnem, "str") == 0)
+        return STR_SIZE;
+    if(strcmp(mnem, "rstr") == 0)
+        return RSTR_SIZE;
+    if(strcmp(mnem, "delstr") == 0)
+        return DELSTR_SIZE;
+    if(strcmp(mnem, "strcat") == 0)
+        return STRCAT_SIZE;
     return 999;
 }

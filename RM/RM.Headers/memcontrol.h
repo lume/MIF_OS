@@ -5,6 +5,7 @@
 #include "IOControl.h"
 #include "SizeDefinitions.h"
 #include <limits>
+#include <string>
 
 //pages and frames are fixed size (4kb)
 
@@ -42,6 +43,7 @@ struct CpuSnapshot
     int fs = 0x0; // flags
     int xReg = 0x0; // x register
     int cReg = 0x0; // c register
+    int retReg = 0x0; // ret register
 };
 
 
@@ -53,15 +55,37 @@ struct Program
     CpuSnapshot cpuSnapshot;
 };
 
+struct Process
+{
+    int id;
+    std::string name;
+    Program program;
+    std::vector<std::string> args;
+    int parent;
+    std::vector<Process> childProcesses;
+    int status; // 0 dead 1 alive 2 zombie
+};
+
+struct HeapBlockHandler
+{
+    Program owner;
+    int size;
+    int start;
+    bool free;
+};
+
 inline std::array<int, RAM_SIZE> RAM = {0};
 inline std::array<int, VRAM_SIZE> VRAM = {0};
 inline std::array<Page, PAGETABLE_SIZE> pageTable;
 inline std::array<int, FRAMETABLE_SIZE> frameTable;
+inline std::vector<HeapBlockHandler> HeapBlockHandlers;
+inline std::vector<Process> processList;
 
 class Memcontrol
 {
     public: 
         Memcontrol();
+        int activeProcessId;
 
         Memory AllocateMemory(uint16_t size, std::vector<int> pagesToIgnore = {});
         void FreeMemory(Memory mem);
@@ -75,7 +99,7 @@ class Memcontrol
         void WriteSegment(Segment segment, int address, int value);
         uint16_t ReadSegment(Segment segment, int address);
 
-        bool CheckIfVarExists(Program program, int var); //returns an address for a new variable
+        int GetVarAddrIfExists(Program program, int var); //returns an address for a new variable
         int FindVarAddress(Program program, int var);
         int FindPtrAddress();
 
@@ -83,6 +107,15 @@ class Memcontrol
         int ConvertToPhysAddress(int addr);
         
         int MoveToSwap(int pageNumber); 
+
+        HeapBlockHandler HeapAlloc(Program owner, int size);
+        void HeapFree(HeapBlockHandler *handler);
+        void StoreStringInHeap(HeapBlockHandler handler, std::string str);
+        std::string ReadStringFromHeap(HeapBlockHandler handler);
+
+        int ForkProcess(std::vector<std::string> args, Program program); //returns new process id
+        void StopCurrentProcess(); // stops current process and sets it's parent process as active
+        std::string getProcessInfoString(int index);
 
     private:
         std::vector<int> freeFramePool;

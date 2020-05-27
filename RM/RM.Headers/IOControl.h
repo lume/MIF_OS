@@ -5,6 +5,8 @@
 #include <semaphore.h>
 #include "SizeDefinitions.h"
 
+#define DRIVE "drive"
+
 // This mutex is to be used for file read/write operations
 inline pthread_mutex_t swapMutex;
 
@@ -34,6 +36,12 @@ class IOControl
         // Initialize a disk if it still does not exist
         void InitDisk();
         void InitCharBuffer();
+
+        std::vector<int> readAllDriveData();
+        bool modifyDriveData(std::vector<int> newData);
+
+        std::vector<int> FindProgramCode(std::string programName, int keywordToSearch);
+        std::vector<std::vector<int>> SplitDriveDataIntoProgramPieces();
     private:
         static void* WriteSwapDataInternal(void* arg);
         static void* ReadSwapDataInternal(void* arg); // returns an array of data from a disk

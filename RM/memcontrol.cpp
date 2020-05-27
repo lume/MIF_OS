@@ -77,6 +77,7 @@ int Memcontrol::FindLeastAccessedPage(std::vector<int> collectedPages)
             page = i;
         }
     }
+
  
     return page;
 }
@@ -207,6 +208,7 @@ std::vector<int> Memcontrol::GetAddressList(std::vector<int> pages)
 
 Memcontrol::Memcontrol()
 {
+    activeProcessId = -1;
     for(int i = 0; i < PAGETABLE_SIZE; i++)
     {
         pageTable[i].frame = i;
@@ -242,17 +244,18 @@ int Memcontrol::FindVarAddress(Program program, int var)
     throw new std::runtime_error("Failed to find variable");
 }
 
-bool Memcontrol::CheckIfVarExists(Program program, int var)
+int Memcontrol::GetVarAddrIfExists(Program program, int var)
 {
     int startAddress = ConvertToPhysAddress(program.dataSegment.startPointer);
+    int varAddr = -1;
     for(int i = 0; i < program.dataSegment.memory.addresses.size(); i+=2)
     {
         if(RAM[startAddress+i] == var)
         {
-            return true;
+            varAddr = startAddress+i;
         }
     }
-    return false;
+    return varAddr;
 }  
 
 Program Memcontrol::PrepareProgramMemory(Program program)
@@ -388,4 +391,124 @@ void Memcontrol::ClearPageBeforeUse(int page)
     {
         RAM[ConvertToPhysAddress(addresses[i])] = 0;
     }
+}
+
+HeapBlockHandler Memcontrol::HeapAlloc(Program owner, int size)
+{
+    HeapBlockHandler newBlock;
+
+    for(auto block : HeapBlockHandlers)
+    {
+        if(block.free && block.size <= size)
+        {
+            //allocate here
+            newBlock.start = block.start;
+            newBlock.size = size;
+            newBlock.owner = owner;
+        }
+    }
+    if(HeapBlockHandlers.size() > 0 && 
+    HeapBlockHandlers.back().start + HeapBlockHandlers.back().size + size <= RAM_SIZE)
+    {
+        //allocate here
+        newBlock.start = HeapBlockHandlers.back().start + HeapBlockHandlers.back().size + 1;
+        newBlock.size = size;
+        newBlock.owner = owner;
+    }
+    else if(HeapBlockHandlers.size() == 0)
+    {
+        //allocate here
+        newBlock.start = HEAP_START;
+        newBlock.size = size;
+        newBlock.owner = owner;
+    }
+    else
+    {
+        std::cout << "No more heap memory" << std::endl;
+        throw std::runtime_error("No more heap memory");
+    }
+    newBlock.free = false;
+    HeapBlockHandlers.insert(HeapBlockHandlers.end(), newBlock);
+    return newBlock;
+}
+
+void Memcontrol::HeapFree(HeapBlockHandler *handler)
+{
+    handler->free = true;
+}
+
+void Memcontrol::StoreStringInHeap(HeapBlockHandler handler, std::string str)
+{
+    int memstart = handler.start;
+    for(int i = 0; i < str.length(); i++)
+    {
+        int valToStore = str[i];
+        RAM[memstart+i] = valToStore;
+    }
+    RAM[memstart+str.length()+1] = 0;
+}
+
+std::string Memcontrol::ReadStringFromHeap(HeapBlockHandler handler)
+{
+    std::vector<int> contents;
+    
+    for(int i = 0; i < handler.size; i++)
+    {
+        int c = RAM[handler.start+i];
+       
+        if(c != 0)
+            contents.insert(contents.end(), RAM[handler.start+i]);
+    }
+    contents.insert(contents.end(), 0);
+
+    std::string str(contents.begin(), contents.end());
+    return str;
+}
+
+int Memcontrol::ForkProcess(std::vector<std::string> args, Program program)
+{
+    Process process;
+    if(activeProcessId != -1)
+        process.parent = processList[activeProcessId].id;
+    process.name = args[0];
+    process.program = program;
+    process.status = 1;
+    process.id = processList.size();
+    if(activeProcessId != -1)
+        processList[activeProcessId].childProcesses.insert(processList[activeProcessId].childProcesses.end(), process);
+    if(process.id == -1)
+    {
+        process.parent = -1;
+        process.id = 0;
+    }
+    process.args = args;
+
+    processList.insert(processList.end(), process);
+    
+    return process.id;
+}
+
+void Memcontrol::StopCurrentProcess()
+{
+    processList[activeProcessId].status = 0;
+    for(auto p : processList[activeProcessId].childProcesses)
+    {
+        p.status = 2;
+    }
+    activeProcessId = processList[activeProcessId].parent;
+}
+
+std::string Memcontrol::getProcessInfoString(int index)
+{
+    Process p = processList[index];
+    std::string str;
+    std::string status;
+    if(p.status == 1)
+        status = "ALIVE";
+    else if(p.status == 0)
+        status = "DEAD";
+    else 
+        status = "ZOMBIE";
+    str += std::to_string(p.id) + " " + p.name + " " + status;
+    return str;
 }

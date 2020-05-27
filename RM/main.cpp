@@ -10,23 +10,26 @@ int main(int argc, char** argv)
 
     if(argc < 2)
     {
-        std::cout << "Please provide a program to launch and add 'step' if you want to run the program in debug mode";
-        exit(1);
+        //std::cout << "Please provide a program to launch and add 'step' if you want to run the program in debug mode";
+        //exit(1);
     }
     else if(argc > 2)
     {
-        if(strcmp(argv[2], "step") == 0)
+        if(strcmp(argv[1], "step") == 0)
             step = true;
     }
 
-    std::cout << "Press any key to start...";
+
+    if(step)
+    {
+        std::cout << "Press any key to start...";
+    }
 
     Cpu cpu = Cpu();
 
-    UI ui = UI(argv[1], step);
     Clock clock = Clock(cpu, step);
 
-    clock.Start(argv[1], ui);
+    clock.Start();
     clock.Update();
 
     return 0;

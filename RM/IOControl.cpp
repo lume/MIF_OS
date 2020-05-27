@@ -134,3 +134,115 @@ std::fstream& IOControl::GotoLine(std::fstream& file, int lineNum)
     }
     return file;
 }
+
+std::vector<int> IOControl::FindProgramCode(std::string programName, int keywordToSearch)
+{
+    auto driveData = readAllDriveData();
+
+    int targetCodeLocation = -1;
+    int iter = 0;
+    int targetCodeSize = 0;
+    for(auto i : driveData)
+    {
+        if(i == keywordToSearch)
+        {
+            int x = programName.size();
+            int y = driveData[iter+1];
+            if(x == y)
+            {
+                std::vector<char> t;
+                for(int j = iter+2; j <= iter+1+driveData[iter+1]; j++)
+                {
+                    t.insert(t.end(), driveData[j]);
+                }
+                std::string a(t.begin(), t.end());
+                if(strcmp(a.c_str(), programName.c_str()) == 0)
+                {
+                    targetCodeSize = driveData[iter+1+ a.length()+1];
+                    targetCodeLocation = iter+driveData[iter+1]+3;
+                    break;
+                }
+            }
+        }
+        iter++;
+    }
+
+    std::vector<int> code;
+    for(int i = 0; i < targetCodeSize; i++)
+    {
+        if(driveData[targetCodeLocation+i] != -2)
+            code.insert(code.end(), driveData[targetCodeLocation+i]);
+        else
+            break;
+    }   
+
+    return code;
+}
+
+std::vector<int> IOControl::readAllDriveData()
+{
+    int dat;
+    std::vector<int> driveData;
+    std::ifstream file(DRIVE);
+    pthread_mutex_lock(&swapMutex);
+    if(file.is_open())
+    {
+        while(file >> dat)
+        {
+            driveData.insert(driveData.end(), dat);
+        }
+        file.close();
+    } 
+    pthread_mutex_unlock(&swapMutex);
+
+    return driveData;
+}
+
+bool IOControl::modifyDriveData(std::vector<int> newData)
+{
+    std::ofstream file;
+    file.open(DRIVE, std::ofstream::out | std::ofstream::trunc);
+    int s = 5000;
+    pthread_mutex_lock(&swapMutex);
+    for(auto dat : newData)
+    {
+        if(s < 0)
+            return false;
+        
+        std::string str = std::to_string(dat);
+        str.append(" ");
+        file.write(str.c_str(), str.length());
+        s--;
+    }
+
+    for(int i = 0; i < s; i++)
+    {
+        file.write("-1 ", 3);
+    }
+    file.close();
+    pthread_mutex_unlock(&swapMutex);
+    return true;
+}
+
+std::vector<std::vector<int>> IOControl::SplitDriveDataIntoProgramPieces()
+{
+    auto driveData = readAllDriveData();
+
+    std::vector<std::vector<int>> programPieces;
+
+    bool fileStarted = false;
+    std::vector<int> programPiece;
+    for(int i : driveData)
+    {
+        
+        if(i == -2)
+        {
+            programPieces.insert(programPieces.end(), programPiece);
+            programPiece.clear();
+        }
+        else if(i != -1)
+            programPiece.insert(programPiece.end(), i);
+    }
+
+    return programPieces;
+}

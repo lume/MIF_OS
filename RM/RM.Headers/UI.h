@@ -4,8 +4,8 @@
 class UI
 {
     public:
+        UI(bool step);
         UI(std::string programName, bool step);
-        UI();
         void Update();
 
         Cpu cpu;
