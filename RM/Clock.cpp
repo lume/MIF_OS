@@ -33,7 +33,7 @@ void Clock::Start()
     InitSwapDisk();
     //this->ui = ui;
     std::cout << "Loading bootloader...\n";
-    activeProgram = cpu.LoadProgram("bootl"); 
+    activeProgram = cpu.LoadProgram("bootloader"); 
     std::cout << "Bootloader is loaded, executing...\n";
     //this->ui.cpu = cpu;
 }

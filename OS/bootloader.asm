@@ -3,7 +3,7 @@ call greeting
 call invokeKernel
 
 label invokeKernel
-str kern
+str kernel
 storer c
 int 3
 
